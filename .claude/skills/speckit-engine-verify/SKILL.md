@@ -14,7 +14,8 @@ Execute the verify command. The authoritative command body lives at
 `.specify/extensions/engine/commands/speckit.engine.verify.md` — read it and follow its steps
 exactly.
 
-Run after `/speckit-implement`. In order, stopping on the first failure: (1) recursive code review
+Runs automatically after `/speckit-converge` (required `after_converge` hook); invoke directly to
+re-certify any time. In order, stopping on the first failure: (1) recursive code review
 via the review module with target `code`; (2) the full unit check gate (must pass); (3) whatever
 E2E the AI can automate, reporting the rest; (4) only on success, set the `verifyPassed` marker and
 sync the card to `in-review`. Produce an honest handoff (verified-automatically vs. remaining-manual

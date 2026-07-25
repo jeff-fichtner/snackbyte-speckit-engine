@@ -54,15 +54,16 @@ Packaged as a standard Spec Kit extension under
 [`.specify/extensions/clickup/`](.specify/extensions/clickup/) — the same shape as
 `git-commit`, `agent-context`, and the other snackbyte extensions. It is **not** a node package;
 the `package.json` at the root exists only to provide the local check gate. Two commands, wired as
-optional lifecycle hooks in [`.specify/extensions.yml`](.specify/extensions.yml):
+**required** lifecycle hooks in [`.specify/extensions.yml`](.specify/extensions.yml) (they run
+automatically on every command; the plug's own config is where a repo opts out):
 
-- **`/speckit-clickup-provision`** (`after_plan`) — find-or-create the ClickUp space + shared list,
-  resolve the status mapping, record targets in the feature manifest. On an unconfigured repo it
-  asks once for the space/list, saves what you give it, and remembers a decline (`enabled: false`)
-  so it never re-asks.
-- **`/speckit-clickup-sync`** (`after_tasks`, `after_implement`) — make the feature's ClickUp card
-  (body, subtasks, checklist, dependencies, status) match the repo. One-way, idempotent (a no-op
-  run makes zero ClickUp writes), MCP-only.
+- **`/speckit-clickup-provision`** (`after_specify`) — find-or-create the ClickUp space + shared
+  list, resolve the status mapping, record targets in the feature manifest, create the card in
+  `open`. On an unconfigured repo it asks once for the space/list, saves what you give it, and
+  remembers a decline (`enabled: false`) so it never re-asks.
+- **`/speckit-clickup-sync`** (every lifecycle event: `after_specify` through `after_close`) —
+  make the feature's ClickUp card (body, subtasks, checklist, dependencies, status) match the
+  repo. One-way, idempotent (a no-op run makes zero ClickUp writes), MCP-only.
 
 Configure the ClickUp plug in
 [`.specify/extensions/clickup/config.yml`](.specify/extensions/clickup/config.yml):

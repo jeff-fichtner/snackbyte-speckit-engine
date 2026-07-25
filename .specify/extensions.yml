@@ -1,8 +1,8 @@
 installed:
 - engine
 - git
-- specify
-- analyze
+- specify-review-loop
+- analyze-autofix
 - clickup
 settings:
   auto_execute_hooks: true
@@ -11,13 +11,13 @@ hooks:
   - extension: git
     command: speckit.git.specify-branch
     enabled: true
-    optional: true
+    optional: false
     priority: 10
     prompt: Clean the working area and switch to the feature branch before specifying?
     description: Ensure a clean working area and feature branch before specifying
     condition: null
   after_specify:
-  - extension: specify
+  - extension: specify-review-loop
     command: speckit.specify-review-loop.run
     enabled: true
     optional: false
@@ -26,45 +26,69 @@ hooks:
     description: Recursively review the spec and fix unambiguous issues (runs before clarify)
     condition: null
   - extension: clickup
+    command: speckit.clickup.provision
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Provision the ClickUp space + shared list for this feature?
+    description: Find-or-create the ClickUp target, record it in the feature manifest, create the card in open
+    condition: null
+  - extension: clickup
     command: speckit.clickup.sync
     enabled: true
-    optional: true
+    optional: false
     priority: 15
     prompt: Sync this feature's card to ClickUp (→ in-design)?
     description: Mirror the feature to ClickUp and advance the card to in-design
+    condition: null
+  - extension: engine
+    command: speckit.clarify
+    enabled: true
+    optional: false
+    priority: 20
+    prompt: Clarify the fresh spec now?
+    description: Auto-continue the lifecycle — run clarify on the just-written spec
+    condition: null
+  after_plan:
+  - extension: engine
+    command: speckit.tasks
+    enabled: true
+    optional: false
+    priority: 10
+    prompt: Generate tasks.md from the plan now?
+    description: Auto-continue the lifecycle — run tasks generation after planning
     condition: null
   before_implement:
   - extension: git
     command: speckit.git.commit
     enabled: true
-    optional: true
+    optional: false
     priority: 10
     prompt: Commit this feature's spec artifacts before implementing?
     description: Checkpoint the feature's spec artifacts before implementation
     condition: null
-  after_plan:
   - extension: clickup
-    command: speckit.clickup.provision
+    command: speckit.clickup.sync
     enabled: true
-    optional: true
+    optional: false
     priority: 15
-    prompt: Provision the ClickUp space + shared list for this feature?
-    description: Find-or-create the ClickUp target and record it in the feature manifest
+    prompt: Sync this feature's card to ClickUp (→ in-development)?
+    description: After the checkpoint, before code — sets implementStarted; card shows in-development for the whole implementation
     condition: null
   after_tasks:
   - extension: clickup
     command: speckit.clickup.sync
     enabled: true
-    optional: true
+    optional: false
     priority: 15
-    prompt: Sync this feature's card to ClickUp (→ ready)?
-    description: Mirror the feature-card, US-subtasks, checklist, and status; advance to ready
+    prompt: Sync this feature's card to ClickUp (stays in-design)?
+    description: Mirror the feature-card, US-subtasks, and checklist; tasks written ≠ ready — card holds in-design
     condition: null
   after_analyze:
-  - extension: analyze
+  - extension: analyze-autofix
     command: speckit.analyze-autofix.run
     enabled: true
-    optional: true
+    optional: false
     priority: 10
     prompt: Apply unambiguous analysis fixes and re-present the results?
     description: Apply unambiguous analysis fixes and re-present results
@@ -72,26 +96,61 @@ hooks:
   - extension: clickup
     command: speckit.clickup.sync
     enabled: true
-    optional: true
+    optional: false
     priority: 15
     prompt: Sync this feature's card to ClickUp (→ ready)?
-    description: Mirror the feature and hold the card at ready (artifacts complete)
+    description: Sets the analyzed marker — analysis complete, design is done; card advances to ready
     condition: null
   after_implement:
-  - extension: clickup
-    command: speckit.clickup.sync
+  - extension: engine
+    command: speckit.converge
     enabled: true
-    optional: true
-    priority: 15
-    prompt: Sync this feature's card to ClickUp (→ in-development)?
-    description: Mirror the feature-card, US-subtasks, checklist, and status; advance to in-development
+    optional: false
+    priority: 10
+    prompt: Converge the codebase against the spec now?
+    description: Auto-continue the lifecycle — converge after implement (converge then triggers verify)
     condition: null
   after_converge:
   - extension: clickup
     command: speckit.clickup.sync
     enabled: true
-    optional: true
+    optional: false
     priority: 15
     prompt: Sync this feature's card to ClickUp (stays in-development)?
-    description: Re-sync after converge; the card holds at in-development until /speckit-engine-verify passes
+    description: Re-sync after converge; the card holds at in-development until verify passes
+    condition: null
+  - extension: engine
+    command: speckit.engine.verify
+    enabled: true
+    optional: false
+    priority: 20
+    prompt: Certify the feature (review + gate + E2E) and advance to in-review?
+    description: Run the verify ceremony automatically after converge; card reaches in-review only on pass
+    condition: null
+  before_verify:
+  - extension: clickup
+    command: speckit.clickup.sync
+    enabled: true
+    optional: false
+    priority: 15
+    prompt: Freshen this feature's card before certification?
+    description: Mirror implementation results (checklist, subtasks) before verify runs; holds in-development
+    condition: null
+  after_verify:
+  - extension: clickup
+    command: speckit.clickup.sync
+    enabled: true
+    optional: false
+    priority: 15
+    prompt: Sync this feature's card to ClickUp (→ in-review)?
+    description: Sync after a passing verify; derive reads verifyPassed and advances the card to in-review
+    condition: null
+  after_close:
+  - extension: clickup
+    command: speckit.clickup.sync
+    enabled: true
+    optional: false
+    priority: 15
+    prompt: Sync this feature's card to ClickUp (→ done)?
+    description: Final sync at close-out; derive reads closedOut and moves card + subtasks to done
     condition: null

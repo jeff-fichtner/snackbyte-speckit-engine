@@ -23,11 +23,11 @@ provides:
 hooks:
   before_specify:
     command: speckit.git.specify-branch
-    optional: true
+    optional: false
     description: "Ensure a clean working area and feature branch before specifying"
   before_implement:
     command: speckit.git.commit
-    optional: true
+    optional: false
     description: "Checkpoint the feature's spec artifacts before implementation"
 
 tags:

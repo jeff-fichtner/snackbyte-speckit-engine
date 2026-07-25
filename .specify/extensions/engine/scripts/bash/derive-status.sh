@@ -5,16 +5,18 @@
 #
 # CARD (six logical states — the engine lifecycle, US3 / contracts/status-model.md):
 #   open           : no spec.md yet (feature just provisioned)
-#   in-design      : spec.md present (specify/clarify/plan)
-#   ready          : tasks.md present (design complete, code not started)
-#   in-development : manifest lifecycle.implementStarted == true (/speckit-implement ran)
+#   in-design      : spec.md present (specify/clarify/plan/tasks — design not yet analyzed)
+#   ready          : manifest lifecycle.analyzed == true (/speckit-analyze completed — artifacts
+#                    checked; design is done, code not started)
+#   in-development : manifest lifecycle.implementStarted == true (recorded by the
+#                    before_implement sync, after the git checkpoint, before code is written)
 #   in-review      : manifest lifecycle.verifyPassed == true (/speckit-engine-verify passed)
 #   done           : manifest lifecycle.closedOut == true (/speckit-engine-close signed off)
-#   States 1–3 derive purely from artifact presence (idempotent). States 4–6 read recorded
-#   markers from the manifest — because `ready` (tasks written) and `in-development` (implement
-#   run) share the same artifacts (spec+plan+tasks), artifact presence alone cannot distinguish
-#   them, so `implementStarted` is recorded by the after_implement sync. Markers are never
-#   inferred from artifacts; a later command re-derives the same state from the same markers.
+#   States 1–2 derive purely from artifact presence (idempotent). States 3–6 read recorded
+#   markers from the manifest — artifact presence alone cannot distinguish them (tasks written,
+#   analyzed, and implement-started all share the same spec+plan+tasks artifacts). Markers are
+#   never inferred from artifacts; a later command re-derives the same state from the same
+#   markers. Later markers win: closedOut > verifyPassed > implementStarted > analyzed.
 #
 # SUBTASK (three states — a user story is a unit of work, FR-016; the 001 behavior, unchanged):
 #   not-started | in-progress | done  from that story's own task completion.
@@ -95,23 +97,15 @@ manifest_flag() {
     fi
 }
 
-# States 4–6 first (recorded markers win over artifact-derived states once set, and later
-# markers win over earlier ones: closedOut > verifyPassed > implementStarted).
+# States 3–6 first (recorded markers win over artifact-derived states once set, and later
+# markers win over earlier ones: closedOut > verifyPassed > implementStarted > analyzed).
 if [[ "$(manifest_flag closedOut)" == "true" ]]; then echo "done"; exit 0; fi
 if [[ "$(manifest_flag verifyPassed)" == "true" ]]; then echo "in-review"; exit 0; fi
 if [[ "$(manifest_flag implementStarted)" == "true" ]]; then echo "in-development"; exit 0; fi
+if [[ "$(manifest_flag analyzed)" == "true" ]]; then echo "ready"; exit 0; fi
 
-# States 1–3 from artifact presence.
+# States 1–2 from artifact presence. Note: tasks.md presence alone does NOT yield `ready` —
+# `ready` means the design was analyzed (the `analyzed` marker), not merely written down.
 if [[ ! -f "$SPEC" ]]; then echo "open"; exit 0; fi          # provisioned, no spec yet
 
-# Distinguish in-design (no tasks yet) from ready (tasks written, design complete).
-task_lines=0
-if [[ -f "$TASKS" ]]; then
-    task_lines="$(grep -cE '^[[:space:]]*-[[:space:]]*\[[ xX]\][[:space:]]*T[0-9]{3}' "$TASKS" || true)"
-fi
-
-if [[ ! -f "$TASKS" || "$task_lines" -eq 0 ]]; then
-    echo "in-design"; exit 0                                  # spec present, no tasks yet
-fi
-
-echo "ready"                                                 # tasks written → ready (until implement runs)
+echo "in-design"                                             # spec present, not yet analyzed

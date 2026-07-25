@@ -5,13 +5,22 @@ argument-hint: "(no arguments)"
 
 # Verify — earn the review state (US8)
 
-The certification pass. Run **after** `/speckit-implement` (and the `after_implement`→converge
-chain). It makes the AI do everything it can to verify the feature, and only on success advances
-the card to `in-review`. `in-review` therefore means "the AI verified all it could" — not merely
-"converge finished". User-invoked (a deliberate step); not an automatic hook.
+The certification pass. Runs **automatically after `/speckit-converge`** (wired as a required
+`after_converge` hook, priority 20 — after that event's ClickUp sync) and can also be invoked
+directly at any time. It makes the AI do everything it can to verify the feature, and only on
+success advances the card to `in-review`. `in-review` therefore means "the AI verified all it
+could" — not merely "converge finished".
 
 Stop on the first failure — never advance to `in-review` over a red gate or an unresolved review
 finding (FR-034). The card stays at `in-development`.
+
+## Pre-execution: dispatch `before_verify` hooks
+
+Read `hooks.before_verify` from `.specify/extensions.yml` and execute each enabled entry in
+priority order (mandatory entries run automatically), exactly like the core commands'
+pre-execution hook flow. The ClickUp plug wires a sync here that freshens the card — completed
+checklist lines, subtask states — so the mirror is current before certification begins (status
+holds `in-development`).
 
 ## Steps (in order; stop on first failure)
 
@@ -44,9 +53,12 @@ finding (FR-034). The card stays at `in-development`.
      ```bash
      .specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key verifyPassed --value true
      ```
-   - Run `/speckit-clickup-sync` so the card advances to `in-review` (the derive helper now reads
-     `verifyPassed`). If ClickUp is disabled/uninstalled, this is a silent no-op — verify still
-     succeeds (the marker is the source of truth).
+   - **Dispatch the `after_verify` hooks**: read `hooks.after_verify` from
+     `.specify/extensions.yml` and execute each enabled entry in priority order, exactly like the
+     core commands' post-execution hook flow (mandatory entries run automatically). The ClickUp
+     plug wires its sync here, advancing the card to `in-review` (the derive helper reads
+     `verifyPassed`). If the plug is disabled/uninstalled, the event has no entries and this is a
+     silent no-op — verify still succeeds (the marker is the source of truth).
 
 ## Handoff report (produced in the flow — the US1 capability, FR-004)
 

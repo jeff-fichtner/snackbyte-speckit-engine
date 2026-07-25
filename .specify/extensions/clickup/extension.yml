@@ -8,7 +8,7 @@ extension:
   # back to `clickup-sync` without renaming every command with it.
   id: clickup
   name: "ClickUp Plug"
-  version: "2.0.0"
+  version: "1.0.0"
   description: "The ClickUp tracker plug for snackbyte-speckit-engine. Mirrors each Spec Kit feature into ClickUp as one feature-card in a shared list, with a subtask per user story (native dependency links), a markdown checkbox list of the tasks.md lines, a verbose body, and the engine's six-state lifecycle status (open→in-design→ready→in-development→in-review→done) advancing on every command. One-way (repo → ClickUp), idempotent, MCP-only. All deterministic lifecycle logic lives in the `engine` extension; this plug only orchestrates ClickUp MCP calls."
   author: snackbyte
   license: MIT
@@ -34,29 +34,49 @@ provides:
 
 hooks:
   after_specify:
-    command: speckit.clickup.sync
-    optional: true
-    description: "Sync the feature-card after specify (→ in-design)"
-  after_plan:
-    command: speckit.clickup.provision
-    optional: true
-    description: "Provision the ClickUp target after planning (card created in open)"
+    - command: speckit.clickup.provision
+      optional: false
+      priority: 10
+      description: "Provision the ClickUp target after specify (card created in open)"
+    - command: speckit.clickup.sync
+      optional: false
+      priority: 15
+      description: "Sync the feature-card after specify (→ in-design)"
   after_tasks:
     command: speckit.clickup.sync
-    optional: true
-    description: "Sync the feature-card after task generation (→ ready)"
+    optional: false
+    priority: 15
+    description: "Sync the feature-card after task generation (stays in-design; tasks written ≠ ready)"
   after_analyze:
     command: speckit.clickup.sync
-    optional: true
-    description: "Sync the feature-card after analyze (→ ready)"
-  after_implement:
+    optional: false
+    priority: 15
+    description: "Sync after analyze — sets the analyzed marker; card → ready"
+  before_implement:
     command: speckit.clickup.sync
-    optional: true
-    description: "Sync the feature-card after implementation (→ in-development)"
+    optional: false
+    priority: 15
+    description: "Sync after the git checkpoint, before code — sets implementStarted; card → in-development"
   after_converge:
     command: speckit.clickup.sync
-    optional: true
+    optional: false
+    priority: 15
     description: "Re-sync after converge (stays in-development until /speckit-engine-verify passes)"
+  before_verify:
+    command: speckit.clickup.sync
+    optional: false
+    priority: 15
+    description: "Freshen the card (checklist, subtasks) before certification; holds in-development"
+  after_verify:
+    command: speckit.clickup.sync
+    optional: false
+    priority: 15
+    description: "Sync after a passing verify — derive reads verifyPassed; card → in-review"
+  after_close:
+    command: speckit.clickup.sync
+    optional: false
+    priority: 15
+    description: "Final sync at close-out — derive reads closedOut; card + subtasks → done"
 
 tags:
   - "clickup"

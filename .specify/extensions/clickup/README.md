@@ -60,8 +60,8 @@ Provisioning refuses to run while the `<...>` placeholders remain.
 
 | Command | Hook | What it does |
 |---|---|---|
-| `/speckit-clickup-provision` | `after_plan` (optional) | Find-or-create the space + shared list, resolve & record the status mapping and target IDs into the feature manifest. |
-| `/speckit-clickup-sync` | `after_tasks`, `after_implement` (optional) | Make the feature-card (body, US-subtasks, checklist, dependencies, status) match the repo. Idempotent — a no-op run makes zero ClickUp writes. |
+| `/speckit-clickup-provision` | `after_specify` (required) | Find-or-create the space + shared list, resolve & record the status mapping and target IDs into the feature manifest; card created in `open`. |
+| `/speckit-clickup-sync` | every lifecycle moment, required — `after_specify`, `after_tasks`, `after_analyze` (sets `analyzed` → `ready`), `before_implement` (sets `implementStarted` → `in-development`), `after_converge`, `before_verify`, `after_verify` (→ `in-review`), `after_close` (→ `done`) | Make the feature-card (body, US-subtasks, checklist, dependencies, status) match the repo. Idempotent — a no-op run makes zero ClickUp writes. Opt out per repo via `enabled: false` in config. |
 
 ## State
 

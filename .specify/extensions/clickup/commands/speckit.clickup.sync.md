@@ -15,12 +15,17 @@ artifacts (spec, plan, tasks) is visible as work, not just implementation.
 comes from a Spec Kit command or close-out. Humans never need to touch the tracker; it is a
 read-only mirror for them.
 
-**Which command called this sync** determines the target lifecycle state (the hook wiring in
-`.specify/extensions.yml` passes the moment). The command→state mapping (contracts/status-model.md):
-`after_specify`/`clarify`/`plan` → `in-design`; `after_tasks`/`after_analyze` → `ready`;
-`after_implement` → `in-development` (also **set the `implementStarted` marker**, below);
-`after_converge` → stays `in-development`. `/speckit-engine-verify` (→ `in-review`) and `/speckit-engine-close`
-(→ `done`) set their own markers and call this sync themselves.
+**Which moment triggered this sync** determines the marker work (the hook wiring in
+`.specify/extensions.yml` passes the moment); the status itself is always re-derived from repo
+state. Moment→state mapping:
+`after_specify` → `in-design`; `after_tasks` → stays `in-design` (mirrors the checklist; tasks
+written ≠ ready); `after_analyze` → `ready` (**set the `analyzed` marker**, below);
+`before_implement` → `in-development` (**set the `implementStarted` marker**, below — this sync
+runs after the git checkpoint, before any code is written, so the card shows in-development for
+the whole implementation); `after_converge` → stays `in-development`; `before_verify` → mirror
+only (holds `in-development` — freshens the card before certification); `after_verify` →
+`in-review` (verify set `verifyPassed` on pass); `after_close` → `done` (close set `closedOut`
+on sign-off).
 
 ## Preconditions
 
@@ -42,13 +47,20 @@ read-only mirror for them.
 
 ## Derive (repo-side, no MCP)
 
-First, **if this sync was triggered by `after_implement`**, record the implement marker so the
-card can derive `in-development` (artifact presence alone can't distinguish `ready` from
-`in-development` — see contracts/status-model.md):
+First, record the moment's lifecycle marker (artifact presence alone can't distinguish these
+states — see contracts/status-model.md):
 
-```bash
-.specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key implementStarted --value true
-```
+- **Triggered by `after_analyze`** — analysis completed, the design is ready for development:
+  ```bash
+  .specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key analyzed --value true
+  ```
+- **Triggered by `before_implement`** — implementation is about to begin (the git checkpoint
+  already ran at priority 10):
+  ```bash
+  .specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key implementStarted --value true
+  ```
+- Any other moment sets no marker here (`verifyPassed`/`closedOut` are set by the verify/close
+  ceremonies themselves before their hooks dispatch this sync).
 
 Then run the helpers to compute the desired state:
 

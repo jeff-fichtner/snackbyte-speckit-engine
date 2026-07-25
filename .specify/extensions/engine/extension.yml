@@ -20,9 +20,35 @@ provides:
       file: commands/speckit.engine.close.md
       description: "Terminal close-out: re-run the gate, surface manual tasks for sign-off, mark done, final sync, commit (US2)"
 
-# verify + close are USER-INVOKED (human-paced): verify is a deliberate certification pass; close
-# waits on sign-off. Neither is wired to an automatic lifecycle hook.
-hooks: {}
+# The engine keeps the lifecycle moving on its own: each phase's completion triggers the next
+# step as a REQUIRED hook — specify → clarify, plan → tasks, implement → converge,
+# converge → verify. (Core-command refs like speckit.tasks are valid hook targets; the CLI
+# validates but does not rewrite them.) The human decision points that remain deliberate:
+# clarify → plan (you answer questions first), tasks → analyze, analyze → implement, and close
+# (waits on sign-off — no hook can time it). verify + close also DISPATCH hook events of their
+# own (verify: `before_verify` at start + `after_verify` on pass; close: `after_close` on
+# sign-off), which plugs (e.g. clickup) wire their syncs into.
+hooks:
+  after_specify:
+    command: speckit.clarify
+    optional: false
+    priority: 20
+    description: "Auto-continue the lifecycle: clarify the fresh spec (runs after review-loop + provision + sync)"
+  after_plan:
+    command: speckit.tasks
+    optional: false
+    priority: 10
+    description: "Auto-continue the lifecycle: generate tasks.md from the plan"
+  after_implement:
+    command: speckit.converge
+    optional: false
+    priority: 10
+    description: "Auto-continue the lifecycle: converge the codebase against the spec (then converge triggers verify)"
+  after_converge:
+    command: speckit.engine.verify
+    optional: false
+    priority: 20
+    description: "Certify the converged feature (review + gate + automatable E2E); on pass the card advances to in-review"
 
 tags:
   - "speckit"

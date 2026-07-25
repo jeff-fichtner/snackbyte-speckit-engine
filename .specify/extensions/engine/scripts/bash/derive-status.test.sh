@@ -21,15 +21,21 @@ r="$(bash "$DERIVE" --dir "$d1" --card)"; [[ "$r" == "open" ]] && ok "no spec �
 d2="$TMP/f2"; mkdir -p "$d2"; : > "$d2/spec.md"; : > "$d2/plan.md"
 r="$(bash "$DERIVE" --dir "$d2")"; [[ "$r" == "in-design" ]] && ok "spec, no tasks → in-design" || bad "in-design" "$r"
 
-# 3. spec + tasks present (no implement marker) → ready
+# 3. spec + tasks present but NOT analyzed → still in-design (analyze gates ready)
 d3="$TMP/f3"; mkdir -p "$d3"; : > "$d3/spec.md"; : > "$d3/plan.md"
 printf -- '- [ ] T001 a\n- [ ] T002 b\n' > "$d3/tasks.md"
-r="$(bash "$DERIVE" --dir "$d3")"; [[ "$r" == "ready" ]] && ok "tasks present, no marker → ready" || bad "ready" "$r"
+r="$(bash "$DERIVE" --dir "$d3")"; [[ "$r" == "in-design" ]] && ok "tasks present, not analyzed → in-design" || bad "in-design" "$r"
 
-# 4. implementStarted marker → in-development (even though artifacts look like 'ready')
+# 3b. analyzed marker → ready (tasks written AND analyze completed)
+d3b="$TMP/f3b"; mkdir -p "$d3b"; : > "$d3b/spec.md"; : > "$d3b/plan.md"
+printf -- '- [ ] T001 a\n- [ ] T002 b\n' > "$d3b/tasks.md"
+printf '{"schemaVersion":"1","lifecycle":{"analyzed":true}}' > "$d3b/.clickup-sync.json"
+r="$(bash "$DERIVE" --dir "$d3b")"; [[ "$r" == "ready" ]] && ok "analyzed → ready" || bad "ready" "$r"
+
+# 4. implementStarted marker → in-development (wins over analyzed)
 d4="$TMP/f4"; mkdir -p "$d4"; : > "$d4/spec.md"; : > "$d4/plan.md"
 printf -- '- [ ] T001 a\n' > "$d4/tasks.md"
-printf '{"schemaVersion":"1","lifecycle":{"implementStarted":true}}' > "$d4/.clickup-sync.json"
+printf '{"schemaVersion":"1","lifecycle":{"analyzed":true,"implementStarted":true}}' > "$d4/.clickup-sync.json"
 r="$(bash "$DERIVE" --dir "$d4")"; [[ "$r" == "in-development" ]] && ok "implementStarted → in-development" || bad "in-development" "$r"
 
 # 5. verifyPassed marker → in-review (wins over artifact state)
@@ -42,9 +48,11 @@ d6="$TMP/f6"; mkdir -p "$d6"; : > "$d6/spec.md"; : > "$d6/plan.md"; printf -- '-
 printf '{"schemaVersion":"1","lifecycle":{"verifyPassed":true,"closedOut":true}}' > "$d6/.clickup-sync.json"
 r="$(bash "$DERIVE" --dir "$d6")"; [[ "$r" == "done" ]] && ok "closedOut → done" || bad "done" "$r"
 
-# 7. idempotence: re-deriving states 1–3 from the same artifacts yields the same state
+# 7. idempotence: re-deriving from the same artifacts + markers yields the same state
 r1="$(bash "$DERIVE" --dir "$d3")"; r2="$(bash "$DERIVE" --dir "$d3")"
-[[ "$r1" == "$r2" && "$r1" == "ready" ]] && ok "ready is idempotent" || bad "idempotent" "$r1/$r2"
+[[ "$r1" == "$r2" && "$r1" == "in-design" ]] && ok "in-design is idempotent" || bad "idempotent" "$r1/$r2"
+r1="$(bash "$DERIVE" --dir "$d3b")"; r2="$(bash "$DERIVE" --dir "$d3b")"
+[[ "$r1" == "$r2" && "$r1" == "ready" ]] && ok "ready is idempotent" || bad "idempotent-ready" "$r1/$r2"
 
 # 8. no-jq fallback: the marker read must still work without jq (Constitution: documented fallback).
 #    CLICKUP_NO_JQ=1 forces the grep branch even on a machine that has jq.
@@ -53,7 +61,9 @@ r="$(CLICKUP_NO_JQ=1 bash "$DERIVE" --dir "$d5")"
 r="$(CLICKUP_NO_JQ=1 bash "$DERIVE" --dir "$d6")"
 [[ "$r" == "done" ]] && ok "no-jq: closedOut marker read via grep fallback" || bad "nojq-closed" "$r"
 r="$(CLICKUP_NO_JQ=1 bash "$DERIVE" --dir "$d3")"
-[[ "$r" == "ready" ]] && ok "no-jq: artifact-derived state unaffected" || bad "nojq-ready" "$r"
+[[ "$r" == "in-design" ]] && ok "no-jq: artifact-derived state unaffected" || bad "nojq-indesign" "$r"
+r="$(CLICKUP_NO_JQ=1 bash "$DERIVE" --dir "$d3b")"
+[[ "$r" == "ready" ]] && ok "no-jq: analyzed marker read via grep fallback" || bad "nojq-analyzed" "$r"
 
 # ---- SUBTASK mode (--us): three states, unchanged from 001 ----
 if command -v jq >/dev/null 2>&1; then

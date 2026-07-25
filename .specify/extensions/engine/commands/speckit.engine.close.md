@@ -41,9 +41,12 @@ AI reflects the decision onto the card.
      .specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key closedOut --value true
      ```
 
-5. **Final sync** — run `/speckit-clickup-sync` so the card + subtasks reach `done`/shipped (the
-   derive helper now reads `closedOut`). The sync itself makes **no commit** (FR-009 /
-   Constitution I). If ClickUp is disabled/uninstalled, this is a silent no-op.
+5. **Final sync via hooks** — **dispatch the `after_close` hooks**: read `hooks.after_close`
+   from `.specify/extensions.yml` and execute each enabled entry in priority order, exactly like
+   the core commands' post-execution hook flow (mandatory entries run automatically). The ClickUp
+   plug wires its sync here, taking the card + subtasks to `done`/shipped (the derive helper
+   reads `closedOut`). The sync itself makes **no commit** (FR-009 / Constitution I). If the plug
+   is disabled/uninstalled, the event has no entries and this is a silent no-op.
 
 6. **Commit the close-out edits** — the implement-time checkpoint fired before these edits
    existed, so a fresh commit is required. Reuse the git-commit module:

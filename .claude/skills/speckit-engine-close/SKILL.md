@@ -16,7 +16,8 @@ Execute the close-out command. The authoritative command body lives at
 Run when the human is ready to close a verified feature. In order: (1) re-run the check gate
 (red → refuse); (2) confirm non-manual tasks complete; (3) surface the remaining manual tasks and
 **wait for explicit sign-off** (never auto-check); (4) on sign-off, mark them done in `tasks.md` and
-set the `closedOut` marker; (5) final sync so the card reaches `done` (the sync never commits);
+set the `closedOut` marker; (5) dispatch the `after_close` hooks (the ClickUp plug syncs the card
+to `done`; the sync never commits);
 (6) commit the close-out edits as a distinct commit (reuse the git-commit module); (7) emit the
 closing handoff. The human signs off in the flow, never by editing the tracker.
 

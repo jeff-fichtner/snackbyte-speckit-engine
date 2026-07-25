@@ -26,7 +26,7 @@ provides:
 hooks:
   after_analyze:
     command: speckit.analyze-autofix.run
-    optional: true
+    optional: false
     description: "Apply unambiguous analysis fixes and re-present results"
 
 tags:
