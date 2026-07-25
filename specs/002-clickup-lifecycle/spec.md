@@ -73,7 +73,7 @@ story is a separately deliverable slice; the priorities below reflect the backlo
   serves both spec and code targets. The upstream `agent-context` (spec-kit-core) is excluded.
   Migrating other repos onto the engine is follow-on work, out of scope here.
 - Q: What about making the lifecycle lighter/configurable (models, verbosity, optional steps)? →
-  A: Deferred to a separate backlog (`003-lifecycle-profiles`) — 002 defines the full, heaviest
+  A: Deferred to a separate backlog (`004-lifecycle-profiles`) — 002 defines the full, heaviest
   lifecycle first; profiles layer on top once it works.
 
 ## User Scenarios & Testing *(mandatory)*
