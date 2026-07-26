@@ -33,8 +33,9 @@ Each needs a fixture I couldn't build without touching your board or a fresh rep
       Structurally guaranteed (manifest-absence), never proven live. **How**: hand-make a card in
       the shared list, run a sync. Expect: untouched, uncounted; spec-driven cards still reconcile.
 - [ ] **Consolidated spine in a clean repo** (quickstart Scenario 8 · SC-015 · US9)
-      **How**: install the engine into a fresh Spec Kit repo. Expect: all five modules available
-      from the one engine; the review module works on both `spec` and `code` targets;
+      **How**: install the engine into a fresh Spec Kit repo. Expect: all four extensions (post
+      2026-07-26 merge) available from the one engine; the review module works on its `spec`,
+      `analysis`, and `code` targets;
       `agent-context` (upstream) still installable alongside, unbroken.
 - [ ] **Plug seam / zero-plug** (quickstart Scenario 9 · SC-013 · FR-032)
       **How**: set the ClickUp plug `enabled: false`. Expect: the lifecycle still runs, sync is a

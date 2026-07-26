@@ -18,8 +18,8 @@ read-only mirror for them.
 **Which moment triggered this sync** determines the marker work (the hook wiring in
 `.specify/extensions.yml` passes the moment); the status itself is always re-derived from repo
 state. Moment→state mapping:
-`after_specify` → `in-design`; `after_tasks` → stays `in-design` (mirrors the checklist; tasks
-written ≠ ready); `after_analyze` → `ready` (**set the `analyzed` marker**, below);
+`after_specify`/`after_clarify` → `in-design`; `after_tasks` → stays `in-design` (mirrors the
+checklist; tasks written ≠ ready); `after_analyze` → `ready` (**set the `analyzed` marker**, below);
 `before_implement` → `in-development` (**set the `implementStarted` marker**, below — this sync
 runs after the git checkpoint, before any code is written, so the card shows in-development for
 the whole implementation); `after_converge` → stays `in-development`; `before_verify` → mirror
@@ -47,20 +47,24 @@ on sign-off).
 
 ## Derive (repo-side, no MCP)
 
-First, record the moment's lifecycle marker (artifact presence alone can't distinguish these
-states — see contracts/status-model.md):
+First, maintain the lifecycle markers for this moment. Markers are claims about the present;
+**when earlier work is redone, peel off the notes that claimed later work was done** (stop-gap
+rule, 2026-07-25 — see specs/backlog/005-stale-lifecycle-markers). Set/clear via
+`manifest.sh set-lifecycle --key <k> --value true|false`; to preserve idempotence, only clear a
+marker that is currently `true` (`manifest.sh get lifecycle` first — a no-op sync must make zero
+manifest writes).
 
-- **Triggered by `after_analyze`** — analysis completed, the design is ready for development:
-  ```bash
-  .specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key analyzed --value true
-  ```
-- **Triggered by `before_implement`** — implementation is about to begin (the git checkpoint
-  already ran at priority 10):
-  ```bash
-  .specify/extensions/engine/scripts/bash/manifest.sh set-lifecycle --key implementStarted --value true
-  ```
-- Any other moment sets no marker here (`verifyPassed`/`closedOut` are set by the verify/close
-  ceremonies themselves before their hooks dispatch this sync).
+| Moment | Set | Peel (clear if true) |
+|---|---|---|
+| `after_specify` / `after_clarify` / `after_tasks` | — | `analyzed`, `verifyPassed` (design changed — analysis + certification are stale) |
+| `after_analyze` | `analyzed` | `verifyPassed` (design moved since certification) |
+| `before_implement` | `implementStarted` | `verifyPassed` (new code voids the cert; the checkpoint already ran at priority 10) |
+| `after_converge` | — | `verifyPassed` (verify re-certifies right after via the chain) |
+| `before_verify` / `after_verify` / `after_close` | — | — |
+
+Never clear `implementStarted` (once code exists, `in-development` is the truthful floor) and
+never clear `closedOut` (reopening `done` is an explicit human act). `verifyPassed`/`closedOut`
+are *set* only by the verify/close ceremonies themselves before their hooks dispatch this sync.
 
 Then run the helpers to compute the desired state:
 

@@ -19,7 +19,7 @@ hand-holding they want. `002` is the ceiling; this makes the floor reachable.
 ### 1. Optional / skippable steps
 
 Let a project (or a run) turn heavy steps off. The recursive self-review, the full E2E sweep, the
-per-command sync, the analyze-autofix pass — each should be individually optional, so a lightweight
+per-command sync, the review-loop analysis pass — each should be individually optional, so a lightweight
 run can skip what it doesn't need. The heavy path stays the default; lightness is opt-in.
 
 ### 2. Model selection (cost)

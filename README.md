@@ -52,7 +52,7 @@ is what makes "zero external plugs" still work.
 
 Packaged as a standard Spec Kit extension under
 [`.specify/extensions/clickup/`](.specify/extensions/clickup/) — the same shape as
-`git-commit`, `agent-context`, and the other snackbyte extensions. It is **not** a node package;
+the `git`, `review-loop`, and `agent-context` extensions. It is **not** a node package;
 the `package.json` at the root exists only to provide the local check gate. Two commands, wired as
 **required** lifecycle hooks in [`.specify/extensions.yml`](.specify/extensions.yml) (they run
 automatically on every command; the plug's own config is where a repo opts out):
@@ -90,8 +90,8 @@ npm run check:all      # shell-syntax lint + every *.test.sh (the ClickUp plug's
 .specify/extensions/clickup/              # the ClickUp plug (a Spec Kit extension)
 ├── extension.yml                         # package declaration + hook slots
 ├── config.yml                            # per-repo space/list (no IDs/secrets)
-├── commands/speckit.clickup.*.md         # the two command prompts (ClickUp MCP orchestration)
-└── scripts/bash/clickup-*.sh             # repo-side helpers (parse/derive/hash/manifest) + tests
+└── commands/speckit.clickup.*.md         # the three command prompts (ClickUp MCP orchestration);
+                                          #   deterministic helpers live in the engine extension
 .claude/skills/speckit-clickup-*/         # user-invocable skill mirrors for the plug
 .specify/extensions.yml                   # installs + wires plugs into the Spec Kit lifecycle
 ```

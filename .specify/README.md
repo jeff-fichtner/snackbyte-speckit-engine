@@ -24,10 +24,10 @@ files.
 .specify/
 ├── extensions.yml                     # installs + wires the engine's modules + plugs
 ├── extensions/                        # the engine spine — snackbyte's lifecycle modules (US9)
-│   ├── git-specify-branch/            # setup: clean tree + feature branch (before_specify)
-│   ├── specify-review-loop/           # recursive review — target: spec (after specify) OR code (verify)
-│   ├── analyze-autofix/               # apply unambiguous artifact fixes (after_analyze)
-│   ├── git-commit/                    # checkpoint commit (before_implement; reused by close-out)
+│   ├── engine/                        # lifecycle core: derive/manifest/parse/status-map/provenance,
+│   │                                  #   verify + close ceremonies, and the auto-chain hooks
+│   ├── git/                           # branch prep (before_specify) + spec checkpoint (before_implement)
+│   ├── review-loop/                   # the review stage (Constitution VII) — targets: spec | analysis | code
 │   └── clickup/                       # the ClickUp plug (first external plug) — see its README
 ├── memory/
 │   └── constitution.md                # the engine's constitution (governs engine + every plug)
@@ -36,7 +36,7 @@ files.
 └── workflows/                         # Spec Kit workflow definitions
 ```
 
-**Consolidation (US9):** the five modules above are snackbyte's own lifecycle extensions, brought
+**Consolidation (US9):** the four extensions above are snackbyte's own lifecycle modules, brought
 into this one engine repo and wired through the single `extensions.yml` (research Decision 1: one
 repo + one registry, not a merged monolith). The upstream **`agent-context`** extension (authored by
 `spec-kit-core`, not snackbyte) is deliberately **excluded** — it is not copied, absorbed, or

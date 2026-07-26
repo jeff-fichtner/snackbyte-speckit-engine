@@ -42,11 +42,16 @@ hooks:
       optional: false
       priority: 15
       description: "Sync the feature-card after specify (→ in-design)"
+  after_clarify:
+    command: speckit.clickup.sync
+    optional: false
+    priority: 15
+    description: "Re-mirror the spec after clarifications are encoded into it; holds in-design"
   after_tasks:
     command: speckit.clickup.sync
     optional: false
     priority: 15
-    description: "Sync the feature-card after task generation (stays in-design; tasks written ≠ ready)"
+    description: "Sync the feature-card after task generation (holds or returns to in-design; tasks written ≠ ready; peels stale analyzed/verifyPassed claims)"
   after_analyze:
     command: speckit.clickup.sync
     optional: false

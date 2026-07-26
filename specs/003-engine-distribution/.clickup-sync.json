@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1",
+  "feature": "003-engine-distribution",
+  "workspaceId": "90141363864",
+  "spaceId": "90146433590",
+  "listId": "901417991049",
+  "statusMapping": {
+    "open": "backlog",
+    "in-design": "in design",
+    "ready": "ready for development",
+    "in-development": "in development",
+    "in-review": "in review",
+    "done": "shipped"
+  },
+  "card": {
+    "id": "86bb3g1bn",
+    "hash": "7b341411587cd196b7325fa07153af8280a27a4079633fef1658b04350338720"
+  }
+}

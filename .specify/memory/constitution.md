@@ -1,29 +1,24 @@
 <!--
 SYNC IMPACT REPORT
-Version change: 1.0.0 → 2.0.0
-Bump rationale: MAJOR — the constitution's subject changed from "the ClickUp sync extension" to
-  "the Spec Kit lifecycle engine, with trackers as swappable plugs." Principles are re-expressed
-  as engine invariants (tracker-agnostic); ClickUp becomes one plug that must honor them. This
-  redefines the governed unit, so it is a MAJOR bump even though most invariants are preserved.
-Modified principles:
-  I. One-Way, Repo Is Source of Truth — generalized from "repo → ClickUp" to "repo → every plug".
-  II. MCP-Only → II. Plugs Own All Tracker I/O — generalized: the engine core never talks to a
-     tracker directly; each plug owns its transport/auth (MCP is the ClickUp plug's instance).
-  III. Idempotent — generalized to "per plug"; still manifest-driven, zero writes on no-op.
-  IV. Scaffolding-Only — generalized: no plug may leak its tracker into shipped app source/docs/CI.
-  V. Deterministic Logic Is Tested (NON-NEGOTIABLE) — unchanged in force; generalized wording.
+Version change: 2.0.0 → 2.1.0
+Bump rationale: MINOR — one new principle added (VII. Earned Handoff); no existing principle
+  removed or redefined. VII codifies the doctrine already implied across the command bodies:
+  every altitude of work reaches the human only through AI self-review, maximal automatable
+  self-testing, and a handoff that states verified-vs-remaining. It also names the review
+  module (targets: spec | analysis | code) as the doctrine's review stage — the basis for
+  merging the former analyze-autofix extension into review-loop (2026-07-26).
+Modified principles: none.
 Added principle:
-  VI. Plugs Are Additive (zero / one / many) — the engine runs with no external plug (built-in
-     local plug), one, or many; plugs are independent and never change engine behavior.
-Added sections: none beyond the new principle. "Additional Constraints" / "Development Workflow"
-  generalized from ClickUp to engine+plug.
+  VII. Earned Handoff — work → self-review → self-test → handoff, at every altitude;
+     state shims (git, tracker) record transitions at handoff boundaries.
+Added sections: none beyond the new principle.
 Removed sections: none.
 Templates requiring updates:
-  ✅ .specify/memory/constitution.md (this file)
   ✅ .specify/templates/plan-template.md — Constitution Check gate is generic; still aligns.
   ✅ .specify/templates/spec-template.md — no mandatory-section conflict.
-  ✅ .specify/templates/tasks-template.md — test-first categorization consistent with Principle V.
+  ✅ .specify/templates/tasks-template.md — test-first categorization consistent with V + VII.
 Deferred TODOs: none.
+Previous report (1.0.0 → 2.0.0, subject change to "engine + plugs"): see git history.
 -->
 # snackbyte-speckit-engine Constitution
 
@@ -89,6 +84,21 @@ error.
 Rationale: this is the whole point of the engine — the lifecycle is the product; trackers are
 interchangeable mirrors. Additivity keeps the engine correct regardless of which plugs are present.
 
+### VII. Earned Handoff: Work → Self-Review → Self-Test → Hand Off (NON-NEGOTIABLE)
+Every altitude of work — spec, design artifacts, code — MUST reach the human only through the
+same sequence: the AI does the work; the AI reviews its own output with the review module
+(targets: `spec` | `analysis` | `code`), fixing every issue that has a single obvious correct
+resolution and never deciding product questions; the AI then tests everything automatable at
+that altitude (cross-artifact analysis for design; the unit gate plus all automatable E2E for
+code); and the handoff states what was done, what was fixed, what was verified automatically
+(with evidence), and what remains for human judgment. Lifecycle state (git checkpoints, tracker
+status) MUST be recorded at handoff boundaries, so the next unit of work initiates from
+recorded state rather than memory.
+Rationale: agent capacity is spent on verification so human attention is spent on judgment. A
+handoff that arrives unreviewed, untested, or unlabeled externalizes the AI's work onto the
+human; an unrecorded transition makes the next step start from guesswork. This principle is the
+engine-level form of the maintainer's testing discipline and governs every command and plug.
+
 ## Additional Constraints
 
 - **Config-only retargeting**: pointing a plug at a different tracker target MUST require editing
@@ -126,4 +136,4 @@ is committed; a change that breaks an invariant is a defect. Complexity that app
 violating a principle MUST instead be justified and, if genuinely warranted, ratified as an
 explicit amendment first.
 
-**Version**: 2.0.0 | **Ratified**: 2026-07-07 | **Last Amended**: 2026-07-11
+**Version**: 2.1.0 | **Ratified**: 2026-07-07 | **Last Amended**: 2026-07-26

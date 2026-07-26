@@ -1,8 +1,7 @@
 installed:
 - engine
 - git
-- specify-review-loop
-- analyze-autofix
+- review-loop
 - clickup
 settings:
   auto_execute_hooks: true
@@ -17,13 +16,13 @@ hooks:
     description: Ensure a clean working area and feature branch before specifying
     condition: null
   after_specify:
-  - extension: specify-review-loop
-    command: speckit.specify-review-loop.run
+  - extension: review-loop
+    command: speckit.review-loop.run
     enabled: true
     optional: false
     priority: 5
     prompt: Recursively review the spec and fix unambiguous issues?
-    description: Recursively review the spec and fix unambiguous issues (runs before clarify)
+    description: Review the just-written spec (target spec) and fix unambiguous issues; runs before provision/sync/clarify
     condition: null
   - extension: clickup
     command: speckit.clickup.provision
@@ -48,6 +47,15 @@ hooks:
     priority: 20
     prompt: Clarify the fresh spec now?
     description: Auto-continue the lifecycle — run clarify on the just-written spec
+    condition: null
+  after_clarify:
+  - extension: clickup
+    command: speckit.clickup.sync
+    enabled: true
+    optional: false
+    priority: 15
+    prompt: Re-sync this feature's card with the clarified spec?
+    description: Re-mirror the spec after clarifications are encoded into it; card holds in-design
     condition: null
   after_plan:
   - extension: engine
@@ -82,16 +90,24 @@ hooks:
     optional: false
     priority: 15
     prompt: Sync this feature's card to ClickUp (stays in-design)?
-    description: Mirror the feature-card, US-subtasks, and checklist; tasks written ≠ ready — card holds in-design
+    description: Mirror the feature-card, US-subtasks, and checklist; tasks written ≠ ready — card holds (or returns to) in-design, peeling stale analyzed/verifyPassed claims
+    condition: null
+  - extension: engine
+    command: speckit.analyze
+    enabled: true
+    optional: false
+    priority: 20
+    prompt: Analyze the artifacts for consistency now?
+    description: Auto-continue the lifecycle — run analyze after tasks (its hooks then advance the card to ready)
     condition: null
   after_analyze:
-  - extension: analyze-autofix
-    command: speckit.analyze-autofix.run
+  - extension: review-loop
+    command: speckit.review-loop.run
     enabled: true
     optional: false
     priority: 10
     prompt: Apply unambiguous analysis fixes and re-present the results?
-    description: Apply unambiguous analysis fixes and re-present results
+    description: Apply the analysis findings (target analysis) and re-check until clean; runs before the sync that records analyzed
     condition: null
   - extension: clickup
     command: speckit.clickup.sync

@@ -26,8 +26,9 @@ holds `in-development`).
 
 1. **Recursive code review** — invoke the consolidated review module with target `code`:
 
-   Run `/speckit-specify-review-loop code` (the `specify-review-loop` module, generalized to a
-   `spec | code` target — FR-037). It recursively reviews the implemented code + tests for the
+   Invoke the `review-loop` module with argument `code` (read and follow
+   `.specify/extensions/review-loop/commands/speckit.review-loop.run.md`; the module's targets
+   are `spec | analysis | code` — FR-037, consolidated per Constitution VII). It recursively reviews the implemented code + tests for the
    active feature: correctness against spec/plan/tasks, obvious bugs, missing/mismatched tests for
    the tasks just implemented, and constitution violations (e.g. deterministic logic that belongs
    in a tested `scripts/bash/*.sh`). It fixes the unambiguous issues each pass and returns
