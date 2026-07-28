@@ -23,6 +23,15 @@ components share one release version from here on (lockstep)."
   need no consumer authentication; the CLI is upstream `github/spec-kit` with extension support
   in tagged releases from v0.13.0 — consumers install a normal released CLI.
 
+### Session 2026-07-27
+
+- Q: FR-012's hook-toggle clause — the CLI regenerates `enabled:` toggles on update (verified;
+  substrate behavior we cannot change). → A: Accepted as a scoped limitation at ship time:
+  preservation is guaranteed for plug config + per-feature manifests; hook toggles are
+  re-applied after update (snapshot workaround documented in docs/CONSUMING.md), with
+  `enabled: false` in `clickup-config.yml` as the durable opt-out. FR-012/SC-003 are read with
+  that scope.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Maintainer publishes a versioned release (Priority: P1)
