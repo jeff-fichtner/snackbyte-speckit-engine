@@ -93,7 +93,7 @@ wiring_lines() { # $1=extensions.yml
     ' "$1"
 }
 
-EXPECTED="$(mktemp)"; ACTUAL="$(mktemp)"; trap 'rm -f "$EXPECTED" "$ACTUAL"' EXIT
+EXPECTED="$(mktemp)"; ACTUAL="$(mktemp)"; DIFF_F="$(mktemp)"; trap 'rm -f "$EXPECTED" "$ACTUAL" "$DIFF_F"' EXIT
 
 for d in "$EXT_DIR"/*/; do
     [[ -f "$d/extension.yml" ]] || continue
@@ -104,10 +104,10 @@ done | sort > "$EXPECTED"
 
 wiring_lines "$WIRING" | sort > "$ACTUAL"
 
-if diff -u "$EXPECTED" "$ACTUAL" > /tmp/wf.diff 2>&1; then
+if diff -u "$EXPECTED" "$ACTUAL" > "$DIFF_F" 2>&1; then
     echo "fidelity OK: $(wc -l < "$EXPECTED" | tr -d ' ') hook entries match field-for-field"
 else
     echo "FIDELITY DRIFT (expected-from-manifests vs wired):" >&2
-    cat /tmp/wf.diff >&2
+    cat "$DIFF_F" >&2
     exit 1
 fi

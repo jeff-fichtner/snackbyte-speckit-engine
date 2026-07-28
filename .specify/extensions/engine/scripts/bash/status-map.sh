@@ -97,6 +97,15 @@ case "$SUB" in
         bucket="$(floor_bucket "$LOGICAL")"
         actual="$(map_get "$MAP" "$bucket")"
         if [[ -n "$actual" ]]; then printf '%s\n' "$actual"; exit 0; fi
+        # A floor-bucket logical against a SIX-state map (subtask statuses, FR-016): bucket
+        # onto the nearest configured six-state — not-started→open, in-progress→in-development,
+        # done→done.
+        case "$bucket" in
+            not-started) actual="$(map_get "$MAP" open)" ;;
+            in-progress) actual="$(map_get "$MAP" in-development)" ;;
+            done)        actual="$(map_get "$MAP" done)" ;;
+        esac
+        if [[ -n "$actual" ]]; then printf '%s\n' "$actual"; exit 0; fi
         # Last resort: emit the floor bucket name itself (caller reports degradation).
         printf '%s\n' "$bucket"
         ;;

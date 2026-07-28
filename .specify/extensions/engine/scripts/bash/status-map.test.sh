@@ -17,6 +17,8 @@ r="$(bash "$MAP" resolve --logical open --map "$SIX")";            [[ "$r" == "b
 r="$(bash "$MAP" resolve --logical in-design --map "$SIX")";       [[ "$r" == "in design" ]] && ok "six: in-design" || bad "six-design" "$r"
 r="$(bash "$MAP" resolve --logical ready --map "$SIX")";           [[ "$r" == "ready for development" ]] && ok "six: ready" || bad "six-ready" "$r"
 r="$(bash "$MAP" resolve --logical in-development --map "$SIX")";  [[ "$r" == "in development" ]] && ok "six: in-development" || bad "six-dev" "$r"
+r="$(bash "$MAP" resolve --logical not-started --map "$SIX")";     [[ "$r" == "backlog" ]] && ok "six: subtask not-started→open bucket" || bad "six-ns" "$r"
+r="$(bash "$MAP" resolve --logical in-progress --map "$SIX")";     [[ "$r" == "in development" ]] && ok "six: subtask in-progress→in-development bucket" || bad "six-ip" "$r"
 r="$(bash "$MAP" resolve --logical in-review --map "$SIX")";       [[ "$r" == "in review" ]] && ok "six: in-review" || bad "six-review" "$r"
 r="$(bash "$MAP" resolve --logical done --map "$SIX")";            [[ "$r" == "shipped" ]] && ok "six: done→shipped" || bad "six-done" "$r"
 

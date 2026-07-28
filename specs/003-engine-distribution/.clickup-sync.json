@@ -15,19 +15,36 @@
   "card": {
     "id": "86bb3g1bn",
     "hash": "sha256:4e98cff11743e8700a24531a8506bbe272798613b5faa87627ece5d3637c1c12",
-    "provenanceHash": "sha256:74e058e5a25480994bcb56b7e3c082894faee84a7222e7e044fe8d20e24af767"
+    "provenanceHash": "sha256:fceb94964a27ab14532c4c2a06b088571665275762b0c8fad7ffe0f917704df1"
   },
   "userStories": [
     {
       "us": "US1",
       "id": "86bb3r5g1",
-      "hash": "sha256:7c556e6928fd13e2b6b75654259f7f4c6f4ea9fb981fa6f502e2c30bb371dace",
+      "hash": "sha256:11148f54ac4126083919f70139723ba633c6067d9e02cb804454ce63255ee15c",
       "dependsOn": []
+    },
+    {
+      "us": "US2",
+      "id": "86bb3r5gb",
+      "hash": "sha256:d900065cfa3c4fae42285e1b7a4ac8b305dcdcd7e5f56be8f6d5ed8321811484",
+      "dependsOn": [
+        "US1"
+      ]
+    },
+    {
+      "us": "US3",
+      "id": "86bb3r5gp",
+      "hash": "sha256:d8bc45f7df19fc10543bcb345fc16c1ed5732dbe7a31cb69ac6563f228e3060d",
+      "dependsOn": [
+        "US1",
+        "US2"
+      ]
     },
     {
       "us": "US4",
       "id": "86bb3r5gw",
-      "hash": "sha256:348ab41b65cca84a01d7f9a6341db2b69ab5c9c79d84d98dee9f5b9b6a681661",
+      "hash": "sha256:d76e07b43c97490a199919213df1eab7157f75fd9ce3380f322a2767eaae9642",
       "dependsOn": [
         "US1",
         "US2",
@@ -37,29 +54,12 @@
     {
       "us": "US5",
       "id": "86bb3r5hw",
-      "hash": "sha256:7c54d17e0408d5c17c923703a37a2c4e73968b9600ee90772ccaa829e9e2a97b",
+      "hash": "sha256:22d1325347eaf7b319752446055da289c70dc60072bdb39036b021194f377d5e",
       "dependsOn": [
         "US1",
         "US2",
         "US3",
         "US4"
-      ]
-    },
-    {
-      "us": "US2",
-      "id": "86bb3r5gb",
-      "hash": "sha256:fad48ae9e021116e2a04aedbf1a227d075aeeccb12ee2083de6aa3f0b2c404a0",
-      "dependsOn": [
-        "US1"
-      ]
-    },
-    {
-      "us": "US3",
-      "id": "86bb3r5gp",
-      "hash": "sha256:6f0d28f9beba29a74e14ed537708b0b28531f1de8c5942afa56a0b39b2e0029c",
-      "dependsOn": [
-        "US1",
-        "US2"
       ]
     }
   ],

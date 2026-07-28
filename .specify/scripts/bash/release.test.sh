@@ -9,6 +9,7 @@ REL="$DIR/release.sh"
 FAIL_F="$(mktemp)"
 ok()  { printf '  ok   %s\n' "$1"; }
 bad() { echo x >> "$FAIL_F"; printf '  FAIL %s — got %s\n' "$1" "$2"; }
+sed_i() { local e="$1" f="$2" tmp; tmp="$(mktemp)"; sed "$e" "$f" > "$tmp" && cat "$tmp" > "$f" && rm -f "$tmp"; }
 
 TMP="$(mktemp -d)"; trap 'rm -rf "$TMP"' EXIT
 
@@ -79,10 +80,10 @@ n="$(grep -l 'version: "2.5.0"' "$R1"/.specify/extensions/*/extension.yml | wc -
 [[ "$n" == "2" ]] && ok "stamp writes both manifests" || bad "stamp-manifests" "$n"
 grep -q '"version": "2.5.0"' "$R1/package.json" && ok "stamp writes package.json" || bad "stamp-pkg" "unchanged"
 bash "$REL" check-drift --root "$R1" >/dev/null 2>&1 && ok "no drift after stamp" || bad "drift-clean" "nonzero"
-sed -i '' 's/version: "2.5.0"/version: "9.9.9"/' "$R1/.specify/extensions/beta/extension.yml"
+sed_i 's/version: "2.5.0"/version: "9.9.9"/' "$R1/.specify/extensions/beta/extension.yml"
 out="$(bash "$REL" check-drift --root "$R1" 2>&1)"; rc=$?
 if [[ $rc -ne 0 && "$out" == *beta* ]]; then ok "drift detected, names beta"; else bad "drift-detect" "rc=$rc out=$out"; fi
-sed -i '' 's/version: "9.9.9"/version: "2.5.0"/' "$R1/.specify/extensions/beta/extension.yml"
+sed_i 's/version: "9.9.9"/version: "2.5.0"/' "$R1/.specify/extensions/beta/extension.yml"
 
 # 3. build: exclusions + layout + repeatability
 D1="$TMP/dist1"; bash "$REL" build --root "$R1" --out "$D1" >/dev/null 2>&1
@@ -117,7 +118,7 @@ want="$(shasum -a 256 "$D1/alpha-2.5.0.zip" | cut -d' ' -f1)"
 C2="$TMP/cat2.json"
 bash "$REL" catalog --root "$R1" --dist "$D1" --version "2.5.0" --base-url "https://example.com/rel" --out "$C2" >/dev/null 2>&1
 cmp -s "$C1" "$C2" && ok "catalog generation byte-stable" || bad "cat-stable" "differs"
-sed -i '' 's/version: "2.5.0"/version: "3.0.0"/' "$R1/.specify/extensions/beta/extension.yml"
+sed_i 's/version: "2.5.0"/version: "3.0.0"/' "$R1/.specify/extensions/beta/extension.yml"
 if bash "$REL" catalog --root "$R1" --dist "$D1" --version "2.5.0" --base-url "u" --out "$TMP/cat3.json" >/dev/null 2>&1; then
     bad "catalog should fail on lockstep drift" "exit0"; else ok "catalog fails on lockstep drift"; fi
 

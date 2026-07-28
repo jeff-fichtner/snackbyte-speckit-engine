@@ -32,6 +32,11 @@ FORBIDDEN_CONTENT=(90141363864 90146433590 901417991049)
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
+sed_i() { # portable in-place sed (BSD/macOS `sed -i ''` vs GNU `sed -i`)
+    local expr="$1" file="$2" tmp
+    tmp="$(mktemp)"; sed "$expr" "$file" > "$tmp" && cat "$tmp" > "$file" && rm -f "$tmp"
+}
+
 sha256() {
     if command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1" | cut -d' ' -f1
     else sha256sum "$1" | cut -d' ' -f1; fi
@@ -60,9 +65,9 @@ cmd_stamp() {
     local d
     for d in $(ext_dirs "$root"); do
         [[ -f "$d/extension.yml" ]] || continue
-        sed -i '' "s/^  version: \".*\"$/  version: \"$version\"/" "$d/extension.yml"
+        sed_i "s/^  version: \".*\"$/  version: \"$version\"/" "$d/extension.yml"
     done
-    [[ -f "$root/package.json" ]] && sed -i '' "s/\"version\": \".*\"/\"version\": \"$version\"/" "$root/package.json"
+    [[ -f "$root/package.json" ]] && sed_i "s/\"version\": \".*\"/\"version\": \"$version\"/" "$root/package.json"
     echo "stamped $version"
 }
 
