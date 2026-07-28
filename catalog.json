@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "extensions": {
+    "clickup": {
+      "name": "ClickUp Plug",
+      "description": "The ClickUp tracker plug for snackbyte-speckit-engine. Mirrors each Spec Kit feature into ClickUp as one feature-card in a shared list, with a subtask per user story (native dependency links), a markdown checkbox list of the tasks.md lines, a verbose body, and the engine's six-state lifecycle status (open→in-design→ready→in-development→in-review→done) advancing on every command. One-way (repo → ClickUp), idempotent, MCP-only. All deterministic lifecycle logic lives in the `engine` extension; this plug only orchestrates ClickUp MCP calls.",
+      "version": "1.0.0",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v1.0.0/clickup-1.0.0.zip",
+      "sha256": "658c51bb8109a108d1ca17c07894f8df688674c127eca252661116d6bf3d29e6"
+    },
+    "engine": {
+      "name": "Spec Kit Lifecycle Engine",
+      "description": "The tracker-agnostic Spec Kit lifecycle engine. Keeps the lifecycle moving on its own — required hooks chain specify→clarify, plan→tasks→analyze, and implement→converge→verify, leaving only clarify→plan, analyze→implement, and close as deliberate human steps. Derives a feature's six-state lifecycle (open→in-design→ready→in-development→in-review→done) from repo artifacts and recorded lifecycle markers, parses tasks.md, maps logical states onto a tracker's real status names (with a three-state fallback), keeps the idempotence manifest, renders commit provenance, and drives the verify + close-out ceremonies. Talks to NO tracker itself — tracker I/O belongs to plugs (e.g. the clickup plug).",
+      "version": "1.0.0",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v1.0.0/engine-1.0.0.zip",
+      "sha256": "ff7e9b2259e3bc88153e6213ba8329295566971cc7a87b2ea3fcb7d05b877ece"
+    },
+    "git-lifecycle": {
+      "name": "Git Lifecycle",
+      "description": "Git operations at Spec Kit lifecycle points: prepare a clean working tree + feature branch before specifying, and checkpoint the feature's spec artifacts before implementation. Merged from the former git-specify-branch and git-commit extensions — renamed from id `git` (2026-07-27): spec-kit BUNDLES its own `git` extension, so `extension add git` resolves to the bundled one and ours could never install by that name — verified live during 003 US2 E2E.",
+      "version": "1.0.0",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v1.0.0/git-lifecycle-1.0.0.zip",
+      "sha256": "e8486dd8d12b9e6c2b88369ca34b33294bdcdd195be1cfe0cef6e5087ba53fd6"
+    },
+    "review-loop": {
+      "name": "Review Loop",
+      "description": "The engine's review stage (Constitution VII: work → self-review → self-test → handoff) — one recursive loop with three targets: `spec` reviews a just-written spec.md; `analysis` applies /speckit-analyze's cross-artifact findings to spec/plan/tasks and re-checks until clean (formerly the analyze-autofix extension); `code` reviews implemented code + tests for /speckit-engine-verify. Fixes every issue with a single obvious correct resolution, never decides product questions, always terminates, and ends with a doctrine-shaped handoff.",
+      "version": "1.0.0",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v1.0.0/review-loop-1.0.0.zip",
+      "sha256": "7d3dd090fb7c4838437b59180c9906d746989a4ef8bc98dc5a10e9c38524251b"
+    }
+  }
+}
