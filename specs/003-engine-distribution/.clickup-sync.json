@@ -14,8 +14,8 @@
   },
   "card": {
     "id": "86bb3g1bn",
-    "hash": "sha256:4e98cff11743e8700a24531a8506bbe272798613b5faa87627ece5d3637c1c12",
-    "provenanceHash": "sha256:fceb94964a27ab14532c4c2a06b088571665275762b0c8fad7ffe0f917704df1"
+    "hash": "sha256:4544b7e06eba3ec17870ee69f99e7a35cd5b3e247183f632545c5b6b8c5a3073",
+    "provenanceHash": "sha256:cb17a3b83e5ba1c268d4471b619e5cca21621a5e2ca4c86b4a0c9e93f2edeed2"
   },
   "userStories": [
     {
@@ -65,6 +65,7 @@
   ],
   "lifecycle": {
     "analyzed": true,
-    "implementStarted": true
+    "implementStarted": true,
+    "verifyPassed": true
   }
 }
