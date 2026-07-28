@@ -37,7 +37,7 @@ Rules:
 
 ## Consumer semantics (verified behaviors to document)
 
-- **Install**: `specify extension add engine clickup git-lifecycle review-loop`
+- **Install**: `for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done`
   (or per-extension). Name resolution goes through the merged catalog stack; project-level
   registration wins over user-level and built-ins.
 - **Update**: `specify extension update` compares catalog version **strictly greater** than the

@@ -90,7 +90,7 @@ The engine ships as **four versioned Spec Kit extensions** (`engine`, `clickup`,
 specify extension catalog add \
   https://raw.githubusercontent.com/jeff-fichtner/snackbyte-speckit-engine/main/catalog.json \
   --name snackbyte --install-allowed
-specify extension add engine clickup git-lifecycle review-loop
+for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done
 ```
 
 Update any time with `specify extension update`. Full guide: [docs/CONSUMING.md](docs/CONSUMING.md) ·

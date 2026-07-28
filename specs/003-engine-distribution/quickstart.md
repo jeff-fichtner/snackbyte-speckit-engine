@@ -12,7 +12,7 @@ version), `gh` authenticated (Scenario 4+ only), `jq`, `zip`, a scratch director
    `http://localhost:8931/...` (the harness script does this).
 3. Fresh consumer: `specify init t1 --integration claude`; register
    `catalog add http://localhost:8931/catalog.json --name snackbyte --install-allowed`;
-   `specify extension add engine clickup git-lifecycle review-loop`.
+   `for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done`.
 4. **Expect**: all four install at the release version; `.claude/skills/` contains every engine +
    plug skill; installed `extensions.yml` hook entries match the manifests **field-for-field**
    (prompt, description, priority, optional) — the SC-004 fidelity diff; no

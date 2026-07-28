@@ -25,7 +25,7 @@ existing ClickUp cards reconcile without duplicates when you sync again.
    specify extension catalog add \
      https://raw.githubusercontent.com/jeff-fichtner/snackbyte-speckit-engine/main/catalog.json \
      --name snackbyte --install-allowed
-   specify extension add engine clickup git-lifecycle review-loop
+   for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done
    ```
 4. **Restore your config under the new names** (preserved across future updates):
    - `.specify/extensions/clickup/clickup-config.yml` (committed) — `space`, `list`,

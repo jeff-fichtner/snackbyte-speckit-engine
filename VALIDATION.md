@@ -61,3 +61,19 @@ Each needs a fixture I couldn't build without touching your board or a fresh rep
   commit message instead of spec-dir path · `set-card` dropping `provenanceHash`.
 - Structural changes you make while testing elsewhere belong back in `specs/002-clickup-lifecycle/`
   (spec + contracts), not just in the code.
+
+---
+
+## 003 — Engine Distribution (shipped 2026-07-27, v1.0.0)
+
+Signed off with a known remainder (maintainer decision 2026-07-27: "testing will be me
+applying it on local projects"). Cross off as you exercise them; the engine + plugs are live at
+https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/tag/v1.0.0.
+
+- [ ] **Migrate the three pre-release repos** (bed-generators, snackbyte-discord,
+      snackbyte-links) via docs/MIGRATION.md — expect: zero duplicate cards, next sync a no-op.
+- [ ] **A friend's Copilot repo full journey** (SC-007): install → configure → provision →
+      first sync using only docs/CONSUMING.md; every needed intervention becomes a doc fix.
+- [ ] **Watch the hook-toggle limitation in practice** (FR-012 scoping, Clarifications
+      2026-07-27): after your first real `specify extension update`, confirm the snapshot
+      workaround in CONSUMING.md is sufficient — else upstream a spec-kit issue.

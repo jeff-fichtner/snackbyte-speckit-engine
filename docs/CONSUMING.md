@@ -21,14 +21,14 @@ No cloning, no file copying.
 specify extension catalog add \
   https://raw.githubusercontent.com/jeff-fichtner/snackbyte-speckit-engine/main/catalog.json \
   --name snackbyte --install-allowed
-specify extension add engine clickup git-lifecycle review-loop
+for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done
 ```
 
 Notes that save you a support round-trip:
 
 - **`--install-allowed` is required** — without it the catalog is discovery-only and installs
   are refused.
-- Install the four together (one command above). The ClickUp plug **requires `engine`** and
+- Install all four (the loop above — the CLI takes one extension per `add`). The ClickUp plug **requires `engine`** and
   fails loud without it — the CLI does not enforce the dependency itself.
 - Do **not** name your own extension `git` — spec-kit bundles a `git` extension and
   `extension add git` always resolves to the bundled one (why ours is `git-lifecycle`).
@@ -106,7 +106,7 @@ lifecycle commands.
 Moving a repo between integrations (say Copilot → Claude Code) does not require reinstalling
 the extensions or touching your config: run `specify init --here --integration claude` (merges
 the new integration's command rendering into the existing project), then re-run
-`specify extension add engine clickup git-lifecycle review-loop` — already-installed extensions
+`for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done` — already-installed extensions
 re-register their commands for the new integration; consumer config, hook wiring, and
 per-feature manifests are untouched.
 
