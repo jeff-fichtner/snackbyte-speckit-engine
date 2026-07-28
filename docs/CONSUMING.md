@@ -64,6 +64,14 @@ specify extension update
   but not merged).
 - **Known limitation**: hook `enabled:` toggles in `.specify/extensions.yml` are regenerated on
   update — re-apply them, or use the durable opt-out (`enabled: false` in `clickup-config.yml`).
+  To make re-applying mechanical, snapshot before updating and diff after:
+  ```bash
+  cp .specify/extensions.yml /tmp/wiring-before.yml
+  specify extension update
+  diff /tmp/wiring-before.yml .specify/extensions.yml   # re-apply any enabled: false you had
+  ```
+  (`.specify/scripts/bash/wiring-fidelity.sh --wiring /tmp/wiring-before.yml
+  --extensions-dir .specify/extensions` in the engine repo shows the same drift field-by-field.)
 - **Catalog cache**: catalog fetches are cached for **1 hour** with no refresh flag. A release
   published minutes ago may not be visible yet; delete `.specify/extensions/.cache/` to force a
   refetch.
@@ -92,6 +100,15 @@ The plug is MCP-only — it needs a ClickUp MCP server visible to your agent:
 
 If the tools are missing, every sync no-ops with a clear message rather than failing your
 lifecycle commands.
+
+## Switching agent integrations
+
+Moving a repo between integrations (say Copilot → Claude Code) does not require reinstalling
+the extensions or touching your config: run `specify init --here --integration claude` (merges
+the new integration's command rendering into the existing project), then re-run
+`specify extension add engine clickup git-lifecycle review-loop` — already-installed extensions
+re-register their commands for the new integration; consumer config, hook wiring, and
+per-feature manifests are untouched.
 
 ## Pre-release (hand-copied) installs
 

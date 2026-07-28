@@ -117,3 +117,10 @@ is test-first bash); E2E scenarios come from quickstart.md.
 ## Implementation Strategy
 
 **MVP = Phase 1 + 2 + US1 + US2** (the two P1 stories are jointly the MVP per spec): after T012, the engine is installable-by-name from a local catalog and the release machinery is proven. Then US3 (update) → US4 (Copilot) → US5 (fidelity helper) → Polish → the real v1.0.0 cut (T021) → friend validation (T022).
+
+---
+
+## Phase 9: Convergence
+
+- [X] T023 Resolve the FR-012 hook-toggle clause per FR-012/SC-003 (partial): add a pre/post-update wiring snapshot step to docs/CONSUMING.md's Update section (diff `.specify/extensions.yml` via `wiring-fidelity.sh` and re-apply `enabled:` choices), and surface the alternative — amending FR-012/SC-003 to scope preservation to config + manifests — as the product decision at review
+- [X] T024 Document agent-integration switching per spec Edge Cases (missing): add a short section to docs/CONSUMING.md — switching a repo's integration (e.g. Copilot → Claude Code) re-renders commands via the CLI without reinstalling extensions or losing consumer state
