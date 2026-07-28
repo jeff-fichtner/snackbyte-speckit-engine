@@ -1,0 +1,4 @@
+# Never ship or copy on install: caches, backups, OS junk.
+.cache/
+.backup/
+.DS_Store

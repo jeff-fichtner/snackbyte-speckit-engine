@@ -22,7 +22,7 @@ forward.
 
 | Field | Rules |
 |---|---|
-| `id` | one of `engine`, `clickup`, `git`, `review-loop`; must equal the command namespace (`speckit.<id>.*`) — CLI-enforced at install |
+| `id` | one of `engine`, `clickup`, `git-lifecycle`, `review-loop`; must equal the command namespace (`speckit.<id>.*`) — CLI-enforced at install |
 | `contents` | extension dir with `extension.yml` at archive root |
 | `excluded` | `.extensionignore` patterns ∪ gitignored files: local config (`local-config.yml`, legacy `config.local.yml`), caches, backups. Enforced at zip time AND scanned post-build (any hit fails the release) |
 | `sha256` | computed at build; embedded in the catalog entry; CLI verifies on download |

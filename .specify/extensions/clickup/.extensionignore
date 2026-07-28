@@ -1,0 +1,7 @@
+# Never ship or copy on install: consumer/local config, caches, junk.
+config.local.yml
+local-config.yml
+clickup-config.yml
+.cache/
+.backup/
+.DS_Store

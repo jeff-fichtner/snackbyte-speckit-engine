@@ -11,31 +11,37 @@ the connected ClickUp MCP server — no API/auth code.
 
 ## Preconditions
 
+- **The engine extension is installed** — `.specify/extensions/engine/scripts/bash/manifest.sh`
+  exists. If not, **stop immediately with zero tracker writes**: "The clickup plug requires the
+  engine extension. Install it: `specify extension add engine`."
 - The ClickUp MCP server is connected.
-- `.specify/extensions/clickup/config.yml` resolves to real `space`/`list` values via the
-  placeholder flow below.
+- The config resolution below yields real `space`/`list` values (or the ask-once flow obtains
+  them).
 
-## Config resolution (local override → placeholder → ask → remember)
+## Config resolution (layered → absent → ask → remember)
 
-Config is layered. Read `.specify/extensions/clickup/config.local.yml` **first** if it
-exists (gitignored; holds this machine's real `space`/`list`), then fall back to
-`config.yml` (distributed source; ships `<...>` placeholders) for any key the override omits.
-Resolve `space` and `list` from that merged view:
+Config is layered, highest wins: env (`SPECKIT_CLICKUP_<KEY>`) > `local-config.yml`
+(gitignored, machine-local) > `clickup-config.yml` (committed, consumer-owned) >
+`extension.yml` `config.defaults`. The shipped extension carries **no** space/list — an
+unconfigured repo simply has no values yet. (Migration grace: legacy
+`config.local.yml`/`config.yml` are read only when none of the new files exist.) Resolve
+`space` and `list` from the merged view:
 
-1. If `enabled: false` is set in `config.yml`, the user has previously **declined** ClickUp
-   sync for this repo. **Silently do nothing and exit 0** — do NOT ask again. (This is the
-   "know not to ask them again" state.)
-2. If both `space` and `list` hold real values (not `<...>` placeholders), use them — proceed
-   to the Steps below. Do not ask.
-3. If either is still a `<...>` placeholder, **ask the user once**: "This repo isn't wired to a
-   ClickUp space/list yet. Give me the ClickUp space name and shared-list name to sync into, or
-   say you don't want ClickUp sync here."
-   - **If they provide values** → write them into **`config.local.yml`** (the gitignored
-     override), NOT into `config.yml` — the distributed source must keep its placeholders so a
-     fresh install still refuses rather than pointing at someone else's space. The saved values
-     mean this question is never asked again.
-   - **If they decline** → set `enabled: false` in `config.local.yml` and record a short note,
-     then exit 0. Never ask again on subsequent runs (handled by rule 1). Do not sync.
+1. If the merged view has `enabled: false`, the user has previously **declined** ClickUp sync
+   for this repo. **Silently do nothing and exit 0** — do NOT ask again. (This is the "know not
+   to ask them again" state.)
+2. If both `space` and `list` resolve to real values (absent ≠ real; a leftover `<...>`
+   placeholder from a migrated repo also ≠ real), use them — proceed to the Steps below. Do
+   not ask.
+3. Otherwise, **ask the user once**: "This repo isn't wired to a ClickUp space/list yet. Give
+   me the ClickUp space name and shared-list name to sync into, or say you don't want ClickUp
+   sync here."
+   - **If they provide values** → write them into **`clickup-config.yml`** (committed,
+     repo-level — the whole team is provisioned once; space/list names are locations, never
+     secrets). Machine-personal deviations belong in `local-config.yml`. The saved values mean
+     this question is never asked again.
+   - **If they decline** → set `enabled: false` in `clickup-config.yml` and record a short
+     note, then exit 0. Never ask again on subsequent runs (handled by rule 1). Do not sync.
    - Only ask **once per run**; if the user gives an unusable answer, stop with a clear message
      rather than re-prompting in a loop.
 
@@ -66,7 +72,7 @@ Resolve `space` and `list` from that merged view:
 5. **Resolve the six-state status mapping** — read the list's available statuses (via
    `clickup_get_list`) and map the engine's **six logical states** onto real status names:
    `open · in-design · ready · in-development · in-review · done`.
-   - **Prefer `config.yml`'s `statuses:` block** if present — it explicitly names the actual
+   - **Prefer the merged config's `statuses:` block** if present — it explicitly names the actual
      status for each logical state. Validate every named status actually exists on the list;
      if one doesn't, **stop** and name the mismatch.
    - **Otherwise resolve a best-effort mapping** from the list's real statuses (e.g. an open-type
@@ -108,6 +114,6 @@ duplicate space or list (the 2nd+ feature is a pure reuse).
 ## Never
 
 - Never creates a ClickUp space automatically (only find; instruct if missing).
-- Never writes to the repo other than the feature manifest.
+- Never writes to the repo other than the feature manifest and its own plug config (the ask-once write to `clickup-config.yml`).
 - Never touches unrelated cards/tasks in the list.
 - Never proceeds past an ambiguous space or an insufficient status set — it stops.

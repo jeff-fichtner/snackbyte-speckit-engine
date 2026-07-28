@@ -26,7 +26,7 @@ files.
 ├── extensions/                        # the engine spine — snackbyte's lifecycle modules (US9)
 │   ├── engine/                        # lifecycle core: derive/manifest/parse/status-map/provenance,
 │   │                                  #   verify + close ceremonies, and the auto-chain hooks
-│   ├── git/                           # branch prep (before_specify) + spec checkpoint (before_implement)
+│   ├── git-lifecycle/                 # branch prep (before_specify) + spec checkpoint (before_implement)
 │   ├── review-loop/                   # the review stage (Constitution VII) — targets: spec | analysis | code
 │   └── clickup/                       # the ClickUp plug (first external plug) — see its README
 ├── memory/

@@ -29,12 +29,18 @@ on sign-off).
 
 ## Preconditions
 
+- **The engine extension is installed** — `.specify/extensions/engine/scripts/bash/derive-status.sh`
+  exists. If not, **stop immediately with zero tracker writes**: "The clickup plug requires the
+  engine extension. Install it: `specify extension add engine`." (The CLI does not enforce
+  `requires.extensions` — this guard is the enforcement.)
 - The ClickUp MCP server is connected.
-- ClickUp sync is not disabled for this repo. Config is layered — read
-  `.specify/extensions/clickup/config.local.yml` (gitignored override) first, then
-  `config.yml` (distributed source) for anything it omits. If the merged view has
-  `enabled: false` (the user previously declined), **silently do nothing and exit 0** — do not
-  ask, do not sync. (Matches provision's decline state.)
+- ClickUp sync is not disabled for this repo. Config is layered, highest wins:
+  env (`SPECKIT_CLICKUP_<KEY>`) > `local-config.yml` (gitignored, machine-local) >
+  `clickup-config.yml` (committed, consumer-owned) > `extension.yml` `config.defaults`.
+  (Migration grace: legacy `config.local.yml`/`config.yml` are read only when none of the new
+  files exist — see docs/MIGRATION.md.) If the merged view has `enabled: false` (the user
+  previously declined), **silently do nothing and exit 0** — do not ask, do not sync. (Matches
+  provision's decline state.)
 - The manifest has `listId` and `statusMapping`. If not, **refuse** and instruct the user to
   run `/speckit-clickup-provision` first — do NOT create the list or guess a mapping here.
   Check with:

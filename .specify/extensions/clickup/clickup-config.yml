@@ -1,0 +1,12 @@
+# ClickUp plug — repo-level config (committed; space/list are locations, never secrets).
+# Machine-local overrides go in local-config.yml (gitignored). Preserved across
+# `specify extension update` (CLI config-rescue naming).
+space: "snackbyte-speckit-engine"
+list: "List"
+statuses:
+  open: "backlog"
+  in-design: "in design"
+  ready: "ready for development"
+  in-development: "in development"
+  in-review: "in review"
+  done: "shipped"

@@ -1,4 +1,0 @@
-# LOCAL override — gitignored. Real values for THIS repo only.
-# Provision/sync read this first, falling back to config.yml (which ships placeholders).
-space: "snackbyte-speckit-engine"
-list: "List"

@@ -8,15 +8,15 @@
 is test-first bash); E2E scenarios come from quickstart.md.
 
 **Organization**: Tasks are grouped by user story. Note the suite is **four** extensions
-(engine, clickup, git, review-loop) after the 2026-07-26 merge.
+(engine, clickup, git-lifecycle, review-loop) after the 2026-07-26 merge.
 
 **Format**: `[ID] [P?] [Story] Description`
 
 ## Phase 1: Setup (shipping hygiene on the existing extensions)
 
-- [ ] T001 [P] Add `.extensionignore` to each extension dir — `.specify/extensions/clickup/.extensionignore` (local config names: `config.local.yml`, `local-config.yml`, `clickup-config.yml`; caches/backups/OS junk) plus minimal defensive ones in `engine/`, `git/`, `review-loop/` (caches/backups/junk; the file self-excludes on install)
-- [ ] T002 [P] Bump `requires.speckit_version` from `">=0.2.0"` to `">=0.13.0"` in all four `.specify/extensions/*/extension.yml` (research D8 — honest floor)
-- [ ] T003 [P] Add hook `prompt` fields to every hook entry in the four `extension.yml` manifests, matching the canonical prompts in `.specify/extensions.yml` (closes the last FR-014 metadata field; priorities/descriptions already pinned)
+- [X] T001 [P] Add `.extensionignore` to each extension dir — `.specify/extensions/clickup/.extensionignore` (local config names: `config.local.yml`, `local-config.yml`, `clickup-config.yml`; caches/backups/OS junk) plus minimal defensive ones in `engine/`, `git/`, `review-loop/` (caches/backups/junk; the file self-excludes on install)
+- [X] T002 [P] Bump `requires.speckit_version` from `">=0.2.0"` to `">=0.13.0"` in all four `.specify/extensions/*/extension.yml` (research D8 — honest floor)
+- [X] T003 [P] Add hook `prompt` fields to every hook entry in the four `extension.yml` manifests, matching the canonical prompts in `.specify/extensions.yml` (closes the last FR-014 metadata field; priorities/descriptions already pinned)
 
 ---
 
@@ -24,8 +24,8 @@ is test-first bash); E2E scenarios come from quickstart.md.
 
 **⚠️ CRITICAL**: T004 changes what US1 packages and what US3 must preserve; T005 is US2's guard.
 
-- [ ] T004 Migrate the clickup plug to the CLI's update-protected config convention (research D4 — verified clobber): add `config.defaults` placeholders to `.specify/extensions/clickup/extension.yml`; delete shipped `config.yml`; update read precedence to env (`SPECKIT_CLICKUP_*`) > `local-config.yml` > `clickup-config.yml` > defaults in `commands/speckit.clickup.sync.md` + `commands/speckit.clickup.provision.md`; point the ruleset write in `commands/speckit.clickup.design-rules.md` at `clickup-config.yml` (it writes config too — do not miss it); move this repo's real values `config.local.yml` → `local-config.yml`; update `.gitignore` + `.specify/extensions/clickup/README.md`
-- [ ] T005 Add the engine-missing runtime guard (FR-008, CLI does not enforce `requires.extensions` — verified): in all three clickup command bodies, before any tracker work, check `.specify/extensions/engine/scripts/bash/` helpers exist; on miss, fail loud naming `specify extension add engine`, zero tracker writes
+- [X] T004 Migrate the clickup plug to the CLI's update-protected config convention (research D4 — verified clobber): add `config.defaults` placeholders to `.specify/extensions/clickup/extension.yml`; delete shipped `config.yml`; update read precedence to env (`SPECKIT_CLICKUP_*`) > `local-config.yml` > `clickup-config.yml` > defaults in `commands/speckit.clickup.sync.md` + `commands/speckit.clickup.provision.md`; point the ruleset write in `commands/speckit.clickup.design-rules.md` at `clickup-config.yml` (it writes config too — do not miss it); move this repo's real values `config.local.yml` → `local-config.yml`; update `.gitignore` + `.specify/extensions/clickup/README.md`
+- [X] T005 Add the engine-missing runtime guard (FR-008, CLI does not enforce `requires.extensions` — verified): in all three clickup command bodies, before any tracker work, check `.specify/extensions/engine/scripts/bash/` helpers exist; on miss, fail loud naming `specify extension add engine`, zero tracker writes
 
 **Checkpoint**: plug config is update-safe and the dependency gap is guarded — release work can begin
 
@@ -37,10 +37,10 @@ is test-first bash); E2E scenarios come from quickstart.md.
 
 **Independent Test**: `release.sh <v> --dry-run` on this repo → four archives, catalog, zero forbidden-content hits, byte-stable re-run (quickstart Scenario 1 step 1).
 
-- [ ] T006 [US1] Write `.specify/scripts/bash/release.test.sh` FIRST (must fail before T007): semver validation + strictly-greater-than-last-tag; version stamping + zero-drift check across the four `extension.yml` + `package.json` (five files); file selection honoring `.extensionignore` + exclusion list; catalog generation (fixed inputs → byte-stable JSON, lockstep enforcement, sha256 fields); forbidden-content scan fixtures (planted `local-config.yml` and a real workspace name must abort)
-- [ ] T007 [US1] Implement the deterministic functions in `.specify/scripts/bash/release.sh` (stamp, drift-check, build_archives, scan_archives, generate_catalog) until `release.test.sh` is green; the gate picks the test up automatically via `run-tests.sh`
-- [ ] T008 [US1] Implement release orchestration in `.specify/scripts/bash/release.sh`: preflight (clean tree, on `main`, `gh`/`jq`/`zip`/`shasum` present — fail loud), `--dry-run` (side-effect-free; also emits `dist/catalog.local.json` with `http://localhost:<port>` URLs for the offline harness), publish (commit `release: v<version>`, tag, push, `gh release create` with four assets), refuse-existing-tag, idempotent resume after a partial publish (contracts/release.command.md)
-- [ ] T009 [US1] Dry-run E2E on this repo: run `release.sh 1.0.0 --dry-run` twice → four ZIPs, catalog matches contracts/catalog.schema.md, zero scan hits, byte-identical archives across runs
+- [X] T006 [US1] Write `.specify/scripts/bash/release.test.sh` FIRST (must fail before T007): semver validation + strictly-greater-than-last-tag; version stamping + zero-drift check across the four `extension.yml` + `package.json` (five files); file selection honoring `.extensionignore` + exclusion list; catalog generation (fixed inputs → byte-stable JSON, lockstep enforcement, sha256 fields); forbidden-content scan fixtures (planted `local-config.yml` and a real workspace name must abort)
+- [X] T007 [US1] Implement the deterministic functions in `.specify/scripts/bash/release.sh` (stamp, drift-check, build_archives, scan_archives, generate_catalog) until `release.test.sh` is green; the gate picks the test up automatically via `run-tests.sh`
+- [X] T008 [US1] Implement release orchestration in `.specify/scripts/bash/release.sh`: preflight (clean tree, on `main`, `gh`/`jq`/`zip`/`shasum` present — fail loud), `--dry-run` (side-effect-free; also emits `dist/catalog.local.json` with `http://localhost:<port>` URLs for the offline harness), publish (commit `release: v<version>`, tag, push, `gh release create` with four assets), refuse-existing-tag, idempotent resume after a partial publish (contracts/release.command.md)
+- [X] T009 [US1] Dry-run E2E on this repo: run `release.sh 1.0.0 --dry-run` twice → four ZIPs, catalog matches contracts/catalog.schema.md, zero scan hits, byte-identical archives across runs
 
 **Checkpoint**: publishable artifacts exist locally; nothing real published yet
 
@@ -52,9 +52,9 @@ is test-first bash); E2E scenarios come from quickstart.md.
 
 **Independent Test**: quickstart Scenario 1 (offline, localhost catalog) end-to-end.
 
-- [ ] T010 [US2] Offline install E2E (quickstart Scenario 1): serve `dist/` via `python3 -m http.server`, fresh `specify init --integration claude` repo, `catalog add … --name snackbyte --install-allowed`, `specify extension add engine clickup git review-loop` → all four at the release version, every command/skill rendered, no local-config anywhere in the install (SC-005 spot-check); record hook wiring for T011/SC-004. Also assert the subset edge case in a second scratch repo: install **only** engine + clickup and run a lifecycle command — no errors from absent-extension hooks (spec Edge Cases)
-- [ ] T011 [US2] Wiring-fidelity assertion for the T010 install: field-for-field diff (event, extension, command, enabled, optional, priority, prompt, description) between the installed `extensions.yml` and the four manifests — zero differences (SC-004; use T017's helper if already built, else perform and script it there)
-- [ ] T012 [US2] Dependency-guard E2E (quickstart Scenario 2): fresh repo, install **only** clickup, run its sync → immediate actionable failure naming `specify extension add engine`, zero tracker writes (validates T005)
+- [X] T010 [US2] Offline install E2E (quickstart Scenario 1): serve `dist/` via `python3 -m http.server`, fresh `specify init --integration claude` repo, `catalog add … --name snackbyte --install-allowed`, `specify extension add engine clickup git-lifecycle review-loop` → all four at the release version, every command/skill rendered, no local-config anywhere in the install (SC-005 spot-check); record hook wiring for T011/SC-004. Also assert the subset edge case in a second scratch repo: install **only** engine + clickup and run a lifecycle command — no errors from absent-extension hooks (spec Edge Cases)
+- [X] T011 [US2] Wiring-fidelity assertion for the T010 install: field-for-field diff (event, extension, command, enabled, optional, priority, prompt, description) between the installed `extensions.yml` and the four manifests — zero differences (SC-004; use T017's helper if already built, else perform and script it there)
+- [X] T012 [US2] Dependency-guard E2E (quickstart Scenario 2): fresh repo, install **only** clickup, run its sync → immediate actionable failure naming `specify extension add engine`, zero tracker writes (validates T005)
 
 **Checkpoint**: MVP complete — a stranger with the CLI and the catalog URL can install the working engine
 
@@ -66,7 +66,7 @@ is test-first bash); E2E scenarios come from quickstart.md.
 
 **Independent Test**: quickstart Scenario 3 (offline N+1 update) + the migration doc followed on one real pre-release repo.
 
-- [ ] T013 [US3] Update-preservation E2E (quickstart Scenario 3): in the T010 consumer, fill `clickup-config.yml` + `local-config.yml`, disable one hook; rebuild at version+1, clear `.specify/extensions/.cache/`, `specify extension update` → all four at N+1, both config files byte-identical, disabled hook still disabled, per-feature manifests untouched (SC-003)
+- [X] T013 [US3] Update-preservation E2E (quickstart Scenario 3): in the T010 consumer, fill `clickup-config.yml` + `local-config.yml`, disable one hook; rebuild at version+1, clear `.specify/extensions/.cache/`, `specify extension update` → all four at N+1, both config files byte-identical, disabled hook still disabled, per-feature manifests untouched (SC-003)
 - [ ] T014 [P] [US3] Write the pre-release migration doc `docs/MIGRATION.md` (FR-013): applies to bed-generators, snackbyte-discord, snackbyte-links — delete old hand-copied extension dir(s) + stale registry entries, move real values `config.local.yml` → `local-config.yml`, catalog-install at 1.0.0 (the pre-release "2.0.0" rewind is inert after reinstall — research D9), keep `.clickup-sync.json` manifests (idempotent reconcile, no duplicate cards). Then **execute the doc** end-to-end on the lowest-stakes of the three repos (quickstart Scenario 6): existing manifests reconcile with 0 duplicate cards, next sync is a no-op
 
 ---
@@ -77,8 +77,8 @@ is test-first bash); E2E scenarios come from quickstart.md.
 
 **Independent Test**: quickstart Scenario 5.
 
-- [ ] T015 [US4] Copilot install E2E (quickstart Scenario 5): `specify init --integration copilot` scratch repo, catalog-install all four → every command rendered under `.github/prompts/` at parity with the Claude set; hook wiring identical to T010's
-- [ ] T016 [P] [US4] Write the Copilot section of the consumer guide (FR-015): connecting a ClickUp MCP server in the consumer's environment, then provision + sync against their own workspace — standalone, no source spelunking
+- [X] T015 [US4] Copilot install E2E (quickstart Scenario 5): `specify init --integration copilot` scratch repo, catalog-install all four → every command rendered under `.github/prompts/` at parity with the Claude set; hook wiring identical to T010's
+- [X] T016 [P] [US4] Write the Copilot section of the consumer guide (FR-015): connecting a ClickUp MCP server in the consumer's environment, then provision + sync against their own workspace — standalone, no source spelunking
 
 ---
 
@@ -88,15 +88,15 @@ is test-first bash); E2E scenarios come from quickstart.md.
 
 **Independent Test**: helper reports zero diffs on a fresh install; seeded diff is caught.
 
-- [ ] T017 [US5] Build `.specify/scripts/bash/wiring-fidelity.sh` + `wiring-fidelity.test.sh` (Constitution V): compare a repo's `extensions.yml` hook entries field-for-field against a set of extension manifests; exit non-zero listing any drift; used by T011 and future releases' self-checks
+- [X] T017 [US5] Build `.specify/scripts/bash/wiring-fidelity.sh` + `wiring-fidelity.test.sh` (Constitution V): compare a repo's `extensions.yml` hook entries field-for-field against a set of extension manifests; exit non-zero listing any drift; used by T011 and future releases' self-checks
 
 ---
 
 ## Phase 8: Polish & Cross-Cutting
 
-- [ ] T018 [P] Consumer guide `docs/CONSUMING.md` (FR-015): CLI install (`uv tool install` from a released spec-kit ≥ 0.13), catalog registration with the **required** `--install-allowed` flag, install/update/uninstall, config how-to (`clickup-config.yml` / `local-config.yml` / env), the 1-hour catalog cache (no refresh flag; delete `.specify/extensions/.cache/` to force), what updates replace vs. preserve
-- [ ] T019 [P] Release runbook `docs/RELEASING.md` (FR-006): bump → `release.sh` → verify → announce; cache-lag note; defects roll forward, never republish a version
-- [ ] T020 Update root `README.md`: distribution section with the raw catalog URL, the two consumer commands, and the four-extension suite
+- [X] T018 [P] Consumer guide `docs/CONSUMING.md` (FR-015): CLI install (`uv tool install` from a released spec-kit ≥ 0.13), catalog registration with the **required** `--install-allowed` flag, install/update/uninstall, config how-to (`clickup-config.yml` / `local-config.yml` / env), the 1-hour catalog cache (no refresh flag; delete `.specify/extensions/.cache/` to force), what updates replace vs. preserve
+- [X] T019 [P] Release runbook `docs/RELEASING.md` (FR-006): bump → `release.sh` → verify → announce; cache-lag note; defects roll forward, never republish a version
+- [X] T020 Update root `README.md`: distribution section with the raw catalog URL, the two consumer commands, and the four-extension suite
 - [ ] T021 Cut **v1.0.0 for real** (`release.sh 1.0.0` on `main`) and run quickstart Scenario 4 from a clean clone/second machine: register the raw `catalog.json` URL, install all four by name, provision + live sync against a real ClickUp space (SC-001, SC-002, SC-006 first half; closes VALIDATION.md's "consolidated spine in a clean repo")
 - [ ] T022 Manual (human-in-the-loop): a friend's Copilot repo completes install → configure → provision → first sync using only the docs (SC-007, SC-006 second half); every needed intervention becomes a documentation fix
 

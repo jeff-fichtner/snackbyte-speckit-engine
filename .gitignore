@@ -8,6 +8,10 @@
 .env.*
 !.env.example
 
+# Extension machine-local config (repo-level values live in *-config.yml, committed)
+.specify/extensions/*/local-config.yml
+.specify/extensions/*/config.local.yml
+
 # Claude agent folder: keep the installed skills, ignore local/credential-prone state
 # (specify init warns the agent folder may hold auth tokens / private artifacts)
 .claude/settings.local.json

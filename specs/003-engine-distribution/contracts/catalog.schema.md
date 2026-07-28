@@ -21,7 +21,7 @@ The URL is a stability contract: the file may change content on releases, never 
                              "download_url": "https://github.com/.../v<release>/engine-<release>.zip",
                              "sha256": "<hex>" },
     "clickup":             { "...": "same shape" },
-    "git":                 { "...": "same shape" },
+    "git-lifecycle":       { "...": "same shape" },
     "review-loop":         { "...": "same shape" }
   }
 }
@@ -37,7 +37,7 @@ Rules:
 
 ## Consumer semantics (verified behaviors to document)
 
-- **Install**: `specify extension add engine clickup git review-loop`
+- **Install**: `specify extension add engine clickup git-lifecycle review-loop`
   (or per-extension). Name resolution goes through the merged catalog stack; project-level
   registration wins over user-level and built-ins.
 - **Update**: `specify extension update` compares catalog version **strictly greater** than the

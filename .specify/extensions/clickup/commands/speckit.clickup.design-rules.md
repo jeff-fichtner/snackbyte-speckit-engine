@@ -10,6 +10,12 @@ baked-in defaults. This command **inspects** the real workspace and **proposes**
 ruleset for explicit human approval — it never silently reshapes the board. Opt-in enrichment:
 with no approved ruleset, the baked-in defaults (from 001/US3) apply unchanged.
 
+## Preconditions
+
+- **The engine extension is installed** — `.specify/extensions/engine/scripts/bash/status-map.sh`
+  exists. If not, **stop immediately with zero tracker writes**: "The clickup plug requires the
+  engine extension. Install it: `specify extension add engine`."
+
 ## Steps
 
 1. **Inspect the real workspace** (read-only) via the ClickUp MCP tools:
@@ -25,8 +31,9 @@ with no approved ruleset, the baked-in defaults (from 001/US3) apply unchanged.
    without a yes (FR-025).
 
 3. **On approval** — record the ruleset as config the sync honors: write the resolved `statuses:`
-   block into `config.yml` and any additional rules into a `rules:` block (or the manifest). With
-   no approved ruleset present, sync uses the baked-in defaults unchanged (FR-026).
+   block into `clickup-config.yml` (committed, consumer-owned — preserved across `specify
+   extension update`) and any additional rules into a `rules:` block there (or the manifest).
+   With no approved ruleset present, sync uses the baked-in defaults unchanged (FR-026).
 
 4. **Reject constitution-violating rules** — if a proposed rule would break a constitution
    principle (e.g. require two-way sync, or move tracker I/O out of the plug), **reject it** and

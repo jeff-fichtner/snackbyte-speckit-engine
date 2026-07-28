@@ -16,7 +16,7 @@
 #   set-us --us US --id ID --hash H [--depends-on "US1,US2"]
 #                                Upsert a user-story subtask entry (merge by `us`).
 #   get-us <US>                  Print the recorded US entry as JSON ({} if none).
-#   set-lifecycle --key K --value V   Set a lifecycle marker (K: implementStarted|verifyPassed|
+#   set-lifecycle --key K --value V   Set a lifecycle marker (K: analyzed|implementStarted|verifyPassed|
 #                                closedOut; V: true|false). Gates card states 4–6 (US3).
 #   get-lifecycle [K]            Print a marker's value (false if unset), or the whole block.
 #   set-provenance-hash --hash H Record card.provenanceHash (US6 dedup) without touching id/hash.
@@ -180,7 +180,7 @@ cmd_get_us() {
     jq -c --arg us "$us" '(.userStories // []) | map(select(.us==$us)) | (.[0] // {})' "$MANIFEST"
 }
 
-# --- lifecycle markers (US3 / data-model.md): implementStarted, verifyPassed, closedOut ---
+# --- lifecycle markers (US3 / data-model.md): analyzed, implementStarted, verifyPassed, closedOut ---
 # These are the only imperatively-set fields; the six-state derivation reads them (states 4–6).
 cmd_set_lifecycle() {
     require_jq
@@ -193,8 +193,8 @@ cmd_set_lifecycle() {
             *) i=$((i+1)) ;;
         esac
     done
-    case "$key" in implementStarted|verifyPassed|closedOut) ;; *)
-        echo "ERROR: unknown lifecycle key: $key (implementStarted|verifyPassed|closedOut)" >&2; exit 2 ;;
+    case "$key" in analyzed|implementStarted|verifyPassed|closedOut) ;; *)
+        echo "ERROR: unknown lifecycle key: $key (analyzed|implementStarted|verifyPassed|closedOut)" >&2; exit 2 ;;
     esac
     # Normalize value to a JSON boolean.
     local jbool="false"; [[ "$val" == "true" || "$val" == "1" ]] && jbool="true"

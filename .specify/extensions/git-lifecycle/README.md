@@ -17,9 +17,9 @@ extension.
 
 | Command | Description |
 |---------|-------------|
-| `speckit.git.commit` | Stage and commit the current feature's spec artifacts. |
+| `speckit.git-lifecycle.commit` | Stage and commit the current feature's spec artifacts. |
 
-Invoked as the slash command `/speckit-git-commit` (Spec Kit maps the dotted
+Invoked as the slash command `/speckit-git-lifecycle-commit` (Spec Kit maps the dotted
 hook name to hyphens).
 
 ## Scope

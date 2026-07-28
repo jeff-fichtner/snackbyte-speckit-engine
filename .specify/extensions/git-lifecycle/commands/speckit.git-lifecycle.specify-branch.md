@@ -8,7 +8,7 @@ Run before `/speckit-specify` to make sure the working area is clean and ready t
 move on, and that the new feature will live on its own git branch.
 
 This command has a **mechanical** half (a bash script) and an **interactive** half
-(driven by the running agent). See the `speckit-git-specify-branch` skill for the
+(driven by the running agent). See the `speckit-git-lifecycle-specify-branch` skill for the
 full agent-driven procedure.
 
 ## Mechanical operations (script)

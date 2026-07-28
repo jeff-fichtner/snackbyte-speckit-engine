@@ -49,8 +49,8 @@ AI reflects the decision onto the card.
    is disabled/uninstalled, the event has no entries and this is a silent no-op.
 
 6. **Commit the close-out edits** — the implement-time checkpoint fired before these edits
-   existed, so a fresh commit is required. Reuse the git-commit module:
-   run `/speckit-git-commit` (or commit directly) to capture the `tasks.md` + manifest close-out
+   existed, so a fresh commit is required. Reuse it:
+   run the git-lifecycle commit module (`.specify/extensions/git-lifecycle/scripts/bash/commit-spec-artifacts.sh`, or commit directly) to capture the `tasks.md` + manifest close-out
    edits as a distinct commit. **Sync must never commit; the commit is this separate step.**
 
 7. **Emit the closing handoff** — the same handoff capability as verify (FR-004): what shipped,

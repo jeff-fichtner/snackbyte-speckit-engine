@@ -42,7 +42,7 @@ archives, and a scan of archive contents finds zero maintainer-local values.
 **Acceptance Scenarios**:
 
 1. **Given** the repo at a tagged release version, **When** the maintainer runs the release step,
-   **Then** one installable archive per extension (engine, clickup, git, review-loop) is produced and attached to a published release, and the catalog lists all
+   **Then** one installable archive per extension (engine, clickup, git-lifecycle, review-loop) is produced and attached to a published release, and the catalog lists all
    four at that version with working download locations.
 2. **Given** a maintainer working copy containing local-only config (e.g. the ClickUp plug's
    `config.local.yml` with real space/list names), **When** archives are built, **Then** no archive
@@ -175,7 +175,7 @@ hook wiring against this repo's canonical wiring for the same extension set.
 - A consumer repo whose recorded plug version is *higher* than the catalog's (the pre-release
   clickup at 2.0.0 vs. first official 1.0.0): the flow must not treat "already newer" as success;
   the migration path (Story 3, scenario 4) governs.
-- Only a subset of the four extensions installed (e.g. engine + clickup, no git extension): the
+- Only a subset of the four extensions installed (e.g. engine + clickup, no git-lifecycle extension): the
   lifecycle must still run; hooks referencing absent extensions must not fire or error.
 - Re-running install over an existing same-version install: must be a safe no-op or clean refusal,
   never a duplicate or corrupted state.

@@ -67,6 +67,10 @@ cnt="$(jq '[.userStories[]|select(.us=="US1")]|length' "$D/.clickup-sync.json")"
 [[ "$(bash "$M" get-lifecycle --dir "$D" verifyPassed)" == "false" ]] && ok "lifecycle default → false" || bad "lc-default" "$(bash "$M" get-lifecycle --dir "$D" verifyPassed)"
 bash "$M" set-lifecycle --dir "$D" --key implementStarted --value true
 [[ "$(bash "$M" get-lifecycle --dir "$D" implementStarted)" == "true" ]] && ok "set implementStarted → true" || bad "lc-set" "fail"
+bash "$M" set-lifecycle --dir "$D" --key analyzed --value true
+[[ "$(bash "$M" get-lifecycle --dir "$D" analyzed)" == "true" ]] && ok "set analyzed → true" || bad "lc-analyzed" "fail"
+bash "$M" set-lifecycle --dir "$D" --key analyzed --value false
+[[ "$(bash "$M" get-lifecycle --dir "$D" analyzed)" == "false" ]] && ok "clear analyzed → false" || bad "lc-analyzed-clear" "fail"
 bash "$M" set-lifecycle --dir "$D" --key verifyPassed --value true
 [[ "$(bash "$M" get-lifecycle --dir "$D" implementStarted)" == "true" ]] && ok "second marker preserves first" || bad "lc-preserve" "clobbered"
 [[ "$(bash "$M" get --dir "$D" listId)" == "L" ]] && ok "lifecycle set preserves targets" || bad "lc-targets" "clobbered"

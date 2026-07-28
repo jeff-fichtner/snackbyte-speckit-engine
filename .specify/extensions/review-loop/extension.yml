@@ -16,7 +16,7 @@ extension:
   license: MIT
 
 requires:
-  speckit_version: ">=0.2.0"
+  speckit_version: ">=0.13.0"
 
 provides:
   commands:
@@ -29,11 +29,13 @@ hooks:
     command: speckit.review-loop.run
     optional: false
     priority: 5
+    prompt: "Recursively review the spec and fix unambiguous issues?"
     description: "Review the just-written spec (target: spec) — must run first at this event, before provision/sync/clarify"
   after_analyze:
     command: speckit.review-loop.run
     optional: false
     priority: 10
+    prompt: "Apply unambiguous analysis fixes and re-present the results?"
     description: "Apply the analysis findings (target: analysis) — runs before the tracker sync that records the analyzed marker"
 
 tags:

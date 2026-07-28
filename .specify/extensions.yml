@@ -1,14 +1,14 @@
 installed:
 - engine
-- git
+- git-lifecycle
 - review-loop
 - clickup
 settings:
   auto_execute_hooks: true
 hooks:
   before_specify:
-  - extension: git
-    command: speckit.git.specify-branch
+  - extension: git-lifecycle
+    command: speckit.git-lifecycle.specify-branch
     enabled: true
     optional: false
     priority: 10
@@ -67,8 +67,8 @@ hooks:
     description: Auto-continue the lifecycle — run tasks generation after planning
     condition: null
   before_implement:
-  - extension: git
-    command: speckit.git.commit
+  - extension: git-lifecycle
+    command: speckit.git-lifecycle.commit
     enabled: true
     optional: false
     priority: 10

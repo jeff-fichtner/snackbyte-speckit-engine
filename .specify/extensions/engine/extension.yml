@@ -9,7 +9,7 @@ extension:
   license: MIT
 
 requires:
-  speckit_version: ">=0.2.0"
+  speckit_version: ">=0.13.0"
 
 provides:
   commands:
@@ -33,26 +33,31 @@ hooks:
     command: speckit.clarify
     optional: false
     priority: 20
+    prompt: "Clarify the fresh spec now?"
     description: "Auto-continue the lifecycle: clarify the fresh spec (runs after review-loop + provision + sync)"
   after_plan:
     command: speckit.tasks
     optional: false
     priority: 10
+    prompt: "Generate tasks.md from the plan now?"
     description: "Auto-continue the lifecycle: generate tasks.md from the plan"
   after_tasks:
     command: speckit.analyze
     optional: false
     priority: 20
+    prompt: "Analyze the artifacts for consistency now?"
     description: "Auto-continue the lifecycle: analyze the artifacts (runs after the checklist sync; analyze's own hooks then advance the card to ready)"
   after_implement:
     command: speckit.converge
     optional: false
     priority: 10
+    prompt: "Converge the codebase against the spec now?"
     description: "Auto-continue the lifecycle: converge the codebase against the spec (then converge triggers verify)"
   after_converge:
     command: speckit.engine.verify
     optional: false
     priority: 20
+    prompt: "Certify the feature (review + gate + E2E) and advance to in-review?"
     description: "Certify the converged feature (review + gate + automatable E2E); on pass the card advances to in-review"
 
 tags:

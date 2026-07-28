@@ -52,7 +52,7 @@ is what makes "zero external plugs" still work.
 
 Packaged as a standard Spec Kit extension under
 [`.specify/extensions/clickup/`](.specify/extensions/clickup/) — the same shape as
-the `git`, `review-loop`, and `agent-context` extensions. It is **not** a node package;
+the `git-lifecycle`, `review-loop`, and `agent-context` extensions. It is **not** a node package;
 the `package.json` at the root exists only to provide the local check gate. Two commands, wired as
 **required** lifecycle hooks in [`.specify/extensions.yml`](.specify/extensions.yml) (they run
 automatically on every command; the plug's own config is where a repo opts out):
@@ -66,7 +66,8 @@ automatically on every command; the plug's own config is where a repo opts out):
   repo. One-way, idempotent (a no-op run makes zero ClickUp writes), MCP-only.
 
 Configure the ClickUp plug in
-[`.specify/extensions/clickup/config.yml`](.specify/extensions/clickup/config.yml):
+[`.specify/extensions/clickup/clickup-config.yml`](.specify/extensions/clickup/clickup-config.yml)
+(committed, consumer-owned — created by provision's ask-once flow on an unconfigured repo):
 
 ```yaml
 space: "<your-space-name>"        # ClickUp space the shared list lives in
@@ -74,9 +75,27 @@ list:  "<your-shared-list-name>"  # the one shared list all feature-cards go int
 ```
 
 No IDs or credentials go here — the connected ClickUp MCP server handles auth, and runtime IDs
-live only in each feature's `specs/<feature>/.clickup-sync.json` manifest. In *this* repo the
-config points at the `snackbyte-speckit-engine` ClickUp space; a shippable copy ships the `<your-…>`
-placeholders.
+live only in each feature's `specs/<feature>/.clickup-sync.json` manifest. Machine-local
+overrides go in `local-config.yml` (gitignored). Both files survive `specify extension update`;
+everything else in the extension is replaced on update. In *this* repo the config points at the
+`snackbyte-speckit-engine` ClickUp space.
+
+## Install into your repo
+
+The engine ships as **four versioned Spec Kit extensions** (`engine`, `clickup`,
+`git-lifecycle`, `review-loop`) from this repo's catalog — no cloning, no file copying
+(spec-kit CLI ≥ 0.13; Claude Code and GitHub Copilot integrations):
+
+```bash
+specify extension catalog add \
+  https://raw.githubusercontent.com/jeff-fichtner/snackbyte-speckit-engine/main/catalog.json \
+  --name snackbyte --install-allowed
+specify extension add engine clickup git-lifecycle review-loop
+```
+
+Update any time with `specify extension update`. Full guide: [docs/CONSUMING.md](docs/CONSUMING.md) ·
+maintainer runbook: [docs/RELEASING.md](docs/RELEASING.md) · pre-release repos:
+[docs/MIGRATION.md](docs/MIGRATION.md).
 
 ## Check gate
 
@@ -89,7 +108,7 @@ npm run check:all      # shell-syntax lint + every *.test.sh (the ClickUp plug's
 ```
 .specify/extensions/clickup/              # the ClickUp plug (a Spec Kit extension)
 ├── extension.yml                         # package declaration + hook slots
-├── config.yml                            # per-repo space/list (no IDs/secrets)
+├── clickup-config.yml                    # per-repo space/list (committed; no IDs/secrets)
 └── commands/speckit.clickup.*.md         # the three command prompts (ClickUp MCP orchestration);
                                           #   deterministic helpers live in the engine extension
 .claude/skills/speckit-clickup-*/         # user-invocable skill mirrors for the plug

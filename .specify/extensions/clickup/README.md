@@ -53,8 +53,12 @@ Shared List (one per repo)
 
 ## Configure
 
-Edit [`config.yml`](config.yml) and set your `space` and `list` names (no IDs, no secrets).
-Provisioning refuses to run while the `<...>` placeholders remain.
+Config is layered, highest wins: env (`SPECKIT_CLICKUP_<KEY>`) → `local-config.yml`
+(gitignored, machine-local) → [`clickup-config.yml`](clickup-config.yml) (committed,
+consumer-owned) → shipped defaults in `extension.yml`. Set your `space` and `list` names in
+`clickup-config.yml` (no IDs, no secrets — provision's ask-once flow writes it for you on an
+unconfigured repo). Both consumer files survive `specify extension update` (CLI config-rescue
+naming); everything else is replaced on update.
 
 ## Commands & hooks
 
@@ -75,8 +79,8 @@ IDs are committed. Nothing else in this package contains IDs or secrets.
 - **One-way**: the sync overwrites ClickUp toward the repo; it never writes back to
   `tasks.md` or any repo artifact, and a hand-edit in ClickUp is reverted on the next sync.
 - **MCP-only**: no custom ClickUp API/auth code.
-- **Portable**: set only `config.yml` to retarget a different workspace/space/list — no code
-  edits.
+- **Portable**: set only `clickup-config.yml` to retarget a different workspace/space/list — no
+  code edits.
 - **Scaffolding-only**: this lives entirely under `.specify/` + `.claude/` + per-feature
   manifests; it introduces no ClickUp references into shipped app source, docs, or CI.
 
