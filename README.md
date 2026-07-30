@@ -83,15 +83,25 @@ everything else in the extension is replaced on update. In *this* repo the confi
 ## Install into your repo
 
 The engine ships as **four versioned Spec Kit extensions** (`engine`, `clickup`,
-`git-lifecycle`, `review-loop`) from this repo's catalog — no cloning, no file copying
-(spec-kit CLI ≥ 0.13; Claude Code and GitHub Copilot integrations):
+`git-lifecycle`, `review-loop`) from this repo's catalog — no cloning, no file copying.
+**If you are an agent setting up a consumer repo, these four commands are the whole job**
+(skip any step whose result already exists):
 
 ```bash
+# 0. spec-kit CLI ≥ 0.13, once per machine
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+# 1. a Spec Kit project, once per repo (--integration copilot for GitHub Copilot)
+specify init --here --integration claude
+# 2. register this repo's catalog, once per repo
 specify extension catalog add \
   https://raw.githubusercontent.com/jeff-fichtner/snackbyte-speckit-engine/main/catalog.json \
   --name snackbyte --install-allowed
+# 3. install the engine suite (one extension per add)
 for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done
 ```
+
+Exception: a repo holding a pre-v1.0.0 **hand-copied** install must follow
+[docs/MIGRATION.md](docs/MIGRATION.md) instead (delete the old copies first).
 
 Update any time with `specify extension update`. Full guide: [docs/CONSUMING.md](docs/CONSUMING.md) ·
 maintainer runbook: [docs/RELEASING.md](docs/RELEASING.md) · pre-release repos:
