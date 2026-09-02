@@ -97,6 +97,26 @@ else
     printf '%s' "$out5" | grep -q '"us":"unattributed"' && ok "T5 (no-jq) unattributed present" || bad "T5" "unattributed missing"
 fi
 
+# --- Fixture 6: a literal "[x]" in the task PROSE must not mark it done (regression) ---
+# The done-check used to match /\[[xX]\]/ anywhere on the line, so a task merely describing
+# an [x] flag was reported complete — and advanced in the tracker on the next sync.
+cat > "$TMP/literal.md" <<'EOF'
+# Tasks
+
+## Phase 1: User Story 1 - First (Priority: P1)
+- [ ] T001 Handle the [x] flag case
+- [x] T002 Genuinely finished
+EOF
+out6="$(bash "$PARSE" --file "$TMP/literal.md")"
+if have_jq; then
+    [[ "$(jget "$out6" '.groups[]|select(.us=="US1").items[]|select(.id=="T001").done')" == "false" ]] \
+        && ok "T6 literal [x] in prose stays open" || bad "T6" "prose [x] marked the task done"
+    [[ "$(jget "$out6" '.groups[]|select(.us=="US1").items[]|select(.id=="T002").done')" == "true" ]] \
+        && ok "T6 a real checked box is still done" || bad "T6" "checked box not reported done"
+else
+    printf '%s' "$out6" | grep -q '"id":"T001","done":false' && ok "T6 (no-jq) prose [x] stays open" || bad "T6" "prose [x] marked done"
+fi
+
 n="$(wc -l < "$FAIL_F" | tr -d "[:space:]")"; n="${n:-0}"
 echo ""
 if [[ "$n" -eq 0 ]]; then echo "parse-tasks: ALL PASS"; else echo "parse-tasks: $n FAIL"; exit 1; fi

@@ -60,6 +60,24 @@ echo "$block" | grep -q 'unrelated-subject' && ok "default prefers spec-dir path
 block="$(run render --feature zzz-spec --path a.txt)"
 echo "$block" | grep -q 'zzz-feat' && ok "explicit --path overrides the default" || bad "path-explicit" "no match"
 
+# 8. cwd-independence: rendering from a SUBDIRECTORY must give the same block as from the root.
+#    The spec-dir probe and `git log` were both cwd-relative, so a hook invoked mid-tree
+#    silently fell through to message-grep and could report "(no commits yet)".
+from_root="$(run render --feature zzz-spec)"
+mkdir -p "$TMP/nested/deeper"
+from_sub="$( cd "$TMP/nested/deeper" && bash "$PROV" render --feature zzz-spec )"
+[[ "$from_root" == "$from_sub" ]] \
+    && ok "render is cwd-independent" || bad "cwd" "subdir render differs from repo-root render"
+
+# 9. the short hash is a pinned length, so the block (and its dedup hash) does not drift with
+#    core.abbrev or repo size.
+hash_default="$(run hash --feature zzz-spec)"
+hash_abbrev7="$( cd "$TMP" && git -c core.abbrev=7 rev-parse --short HEAD >/dev/null; \
+                 GIT_CONFIG_COUNT=1 GIT_CONFIG_KEY_0=core.abbrev GIT_CONFIG_VALUE_0=7 \
+                 bash "$PROV" hash --feature zzz-spec )"
+[[ "$hash_default" == "$hash_abbrev7" ]] \
+    && ok "dedup hash is stable across core.abbrev" || bad "abbrev" "hash drifts with core.abbrev"
+
 n="$(wc -l < "$FAIL_F" | tr -d "[:space:]")"; n="${n:-0}"
 echo ""
 if [[ "$n" -eq 0 ]]; then echo "provenance: ALL PASS"; else echo "provenance: $n FAIL"; exit 1; fi

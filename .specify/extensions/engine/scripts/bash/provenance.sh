@@ -36,18 +36,38 @@ sha256() {
 # first. Empty history → a header with an explicit "(no commits yet)" line.
 render_block() {
     local feature="$1" pathspec="${2:-}"
-    local log
+    local log repo_root
+    # Everything below is resolved against the git top-level, never the caller's cwd. Both the
+    # `-d` probe and `git log` are otherwise cwd-relative, so running this from a subdirectory
+    # (src/, or any hook invoked mid-tree) silently falls through to the message-grep branch
+    # and can render "(no commits yet)" for a feature that has plenty.
+    #
+    # Deliberately `git rev-parse --show-toplevel` and NOT common.sh's get_repo_root: this
+    # renders GIT history, so the enclosing git repo is the honest anchor. get_repo_root
+    # resolves the spec-kit PROJECT root — it hunts for a `.specify/` marker and, failing to
+    # find one, falls back to the directory this script was installed into. In a normal
+    # project the two coincide; where they don't, that fallback would read an unrelated repo.
+    repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" || repo_root=""
+    if [[ -z "$repo_root" ]]; then
+        # Not inside a git repo at all — nothing to render, and the caller still gets a
+        # well-formed (empty) block rather than a stack of git errors.
+        printf '## Commits (%s)\n\n(no commits yet)\n' "$feature"
+        return 0
+    fi
     # Selection: explicit --path > the feature's spec dir (default) > message grep (fallback).
     # Path-based is the honest signal — "commits that touched this feature" — and catches commits
     # whose message doesn't spell out the full feature dir name (e.g. "002 Phase 3-11: ...").
-    if [[ -z "$pathspec" && -d "specs/$feature" ]]; then
+    if [[ -z "$pathspec" && -d "$repo_root/specs/$feature" ]]; then
         pathspec="specs/$feature"
     fi
+    # --abbrev=12 pins the short-hash length. %h otherwise follows core.abbrev and grows with
+    # the object count, so the same history would render — and therefore HASH — differently on
+    # two machines or as the repo grows, breaking the "re-runs add nothing" dedup guarantee.
     if [[ -n "$pathspec" ]]; then
-        log="$(git log --no-merges --format='%h %s' -- "$pathspec" 2>/dev/null || true)"
+        log="$(git -C "$repo_root" log --no-merges --abbrev=12 --format='%h %s' -- "$pathspec" 2>/dev/null || true)"
     else
         # Fallback: commits whose subject/body references the feature name (case-insensitive).
-        log="$(git log --no-merges --format='%h %s' --grep="$feature" -i 2>/dev/null || true)"
+        log="$(git -C "$repo_root" log --no-merges --abbrev=12 --format='%h %s' --grep="$feature" -i 2>/dev/null || true)"
     fi
     printf '## Commits (%s)\n\n' "$feature"
     if [[ -z "$log" ]]; then

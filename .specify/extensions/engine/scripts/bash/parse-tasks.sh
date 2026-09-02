@@ -54,7 +54,9 @@ FEATURE_NAME="$(basename "$(dirname "$FILE")")"
 
 # Parse into "US<TAB>id<TAB>done<TAB>text" rows. Then assemble JSON.
 # - A task line: optional leading spaces, "- [ ]" or "- [x]/[X]", then "T" + 3 digits.
-# - done = the box is x/X.
+# - done = the LEADING box is x/X. Anchored deliberately: an unanchored /\[[xX]\]/ also
+#   matches a literal "[x]" in the task's own prose (e.g. "Handle the [x] flag case"), which
+#   silently reports an open task as complete and advances it in the tracker.
 # - us   = the [US#] marker on the line, else the nearest "User Story N" phase heading, else "unattributed".
 rows="$(awk '
     # Track the current phase-heading user story as a fallback.
@@ -73,7 +75,7 @@ rows="$(awk '
     /^[[:space:]]*-[[:space:]]*\[[ xX]\][[:space:]]*T[0-9][0-9][0-9]/ {
         line = $0
         # done?
-        done = (line ~ /\[[xX]\]/) ? "true" : "false"
+        done = (line ~ /^[[:space:]]*-[[:space:]]*\[[xX]\]/) ? "true" : "false"
         # id
         match(line, /T[0-9][0-9][0-9]/); id = substr(line, RSTART, RLENGTH)
         # explicit [US#] on the line?
