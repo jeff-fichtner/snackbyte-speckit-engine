@@ -125,6 +125,11 @@ npm run check:all      # shell-syntax lint + every *.test.sh (the ClickUp plug's
 .specify/extensions.yml                   # installs + wires plugs into the Spec Kit lifecycle
 ```
 
+Only the extension payloads under `.specify/extensions/<name>/` are product.
+Everything else here — Spec Kit itself, `specs/`, the release flow, the check
+gate, agent config — is development apparatus for this repo and is never
+exported to a consumer. See [`docs/EXPORT-BOUNDARY.md`](docs/EXPORT-BOUNDARY.md).
+
 ## Specs
 
 - [`001-clickup-sync`](specs/001-clickup-sync/spec.md) — the ClickUp plug (shipped, validated
