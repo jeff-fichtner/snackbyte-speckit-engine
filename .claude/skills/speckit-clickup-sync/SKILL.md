@@ -24,11 +24,14 @@ materializes as soon as `spec.md` exists and is enriched on every run.
 
 1. Read the full command body at
    `.specify/extensions/clickup/commands/speckit.clickup.sync.md`.
-2. Follow it verbatim: refuse (and point the user to `/speckit-clickup-provision`) unless the
-   manifest has `listId` + `statusMapping`; derive body / US-subtasks / checkbox-lists / deps /
-   status via the `clickup-*.sh` helpers; hash each element canonically; diff against the
-   manifest; and create/update via the ClickUp MCP tools, skipping unchanged elements with zero
-   MCP calls.
+2. Follow it verbatim:
+   - refuse (and point the user to `/speckit-clickup-provision`) unless the manifest has
+     `workspaceId` + `listId` + `statusMapping`
+   - derive body / US-subtasks / checkbox-lists / deps / status via the engine helpers
+   - hash each element canonically and diff against the manifest
+   - create/update via the ClickUp MCP tools, skipping unchanged elements with zero MCP calls
+   - pass `workspace_id` on every call and address everything by its recorded ID (status is set
+     by name, the one stated exception)
 3. Enforce one-way overwrite (repo is authoritative; hand-edits in ClickUp revert), progressive
    materialization (card at spec-only, no empty-checklist noise), and the orphaned-US-subtask
    rule (report + leave in place, re-point deps — do NOT delete).

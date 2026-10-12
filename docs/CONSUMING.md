@@ -39,17 +39,30 @@ Notes that save you a support round-trip:
 Config is layered, highest wins: env (`SPECKIT_CLICKUP_<KEY>`) → `local-config.yml`
 (gitignored, machine-local) → `clickup-config.yml` (committed, repo-level) → shipped defaults.
 
-You normally configure nothing by hand: the first lifecycle command asks once for your space +
-list and writes `clickup-config.yml`; declining writes `enabled: false` there and never asks
-again. To pre-seed or retarget:
+The plug locates ClickUp containers **by ID only**. A name is a comment, never a lookup. The
+first lifecycle command asks once for the IDs and writes `clickup-config.yml`. Declining writes
+`enabled: false` there and it never asks again. To pre-seed or retarget:
 
 ```yaml
-# .specify/extensions/clickup/clickup-config.yml   (names only — no IDs, no secrets)
-space: "My Space"
-list: "My List"
+# .specify/extensions/clickup/clickup-config.yml — IDs only; names belong in comments
+workspace-id: "<workspace id>"   # e.g. Workspace
+space-id: "<space id>"           # e.g. products
+list-id: "<list id>"             # e.g. karaoke / Roadmap
 ```
 
-Runtime ClickUp IDs live only in each feature's `specs/<feature>/.clickup-sync.json`.
+- **Where the IDs are**: a list's URL is `app.clickup.com/<workspace-id>/v/l/li/<list-id>`. A
+  space's or folder's ID is in its URL.
+- **No list yet?** Set `folder-id` + `new-list-name` instead of `list-id`. The first provision
+  creates the list in that folder and rewrites `new-list-name` to the pinned `list-id`. The
+  pre-implementation checkpoint commits the change with the spec.
+- **Errors are loud**: a missing `workspace-id`/`space-id`/`list-id`, a name key without its ID
+  (`list: "Roadmap"`), or a non-numeric ID stops provision before any ClickUp call, naming the
+  key.
+- **Statuses** (`statuses:`) are mapped by name: the one stated exception, because ClickUp sets
+  status by name.
+
+Committed ClickUp IDs live in exactly two places: this config (the target containers) and each
+feature's `specs/<feature>/.clickup-sync.json` (the cards it created).
 
 ## Update
 

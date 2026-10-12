@@ -1,24 +1,23 @@
 <!--
 SYNC IMPACT REPORT
-Version change: 2.0.0 → 2.1.0
-Bump rationale: MINOR — one new principle added (VII. Earned Handoff); no existing principle
-  removed or redefined. VII codifies the doctrine already implied across the command bodies:
-  every altitude of work reaches the human only through AI self-review, maximal automatable
-  self-testing, and a handoff that states verified-vs-remaining. It also names the review
-  module (targets: spec | analysis | code) as the doctrine's review stage — the basis for
-  merging the former analyze-autofix extension into review-loop (2026-07-26).
-Modified principles: none.
-Added principle:
-  VII. Earned Handoff — work → self-review → self-test → handoff, at every altitude;
-     state shims (git, tracker) record transitions at handoff boundaries.
-Added sections: none beyond the new principle.
-Removed sections: none.
+Version change: 2.1.0 → 3.0.0
+Bump rationale: MAJOR — Principles II and IV are redefined in a backward-incompatible way
+  (006-id-only-clickup-targets, 2026-10-11). A plug's config now identifies its target BY ID,
+  and container IDs may be committed in the plug's repo-level config as well as in the
+  per-feature manifest. A name-based config that complied with 2.1.0 is now invalid: a name
+  never locates a container.
+Modified principles:
+  II. Plugs Own All Tracker I/O: "config names only WHERE" → "config identifies WHERE by ID";
+     a name is never a lookup.
+  IV. Scaffolding-Only: tracker IDs are confined to the plug's repo-level config (container IDs)
+     and the per-feature manifest (item IDs), and nowhere else.
+Added principles: none. Removed principles: none.
 Templates requiring updates:
-  ✅ .specify/templates/plan-template.md — Constitution Check gate is generic; still aligns.
-  ✅ .specify/templates/spec-template.md — no mandatory-section conflict.
-  ✅ .specify/templates/tasks-template.md — test-first categorization consistent with V + VII.
+  ✅ .specify/templates/plan-template.md: Constitution Check gate is generic; still aligns.
+  ✅ .specify/templates/spec-template.md: no mandatory-section conflict.
+  ✅ .specify/templates/tasks-template.md: unaffected.
 Deferred TODOs: none.
-Previous report (1.0.0 → 2.0.0, subject change to "engine + plugs"): see git history.
+Previous report (2.0.0 → 2.1.0, VII. Earned Handoff added): see git history.
 -->
 # snackbyte-speckit-engine Constitution
 
@@ -45,7 +44,8 @@ plugs.
 The engine core MUST NOT talk to any external tracker directly. Every tracker operation MUST go
 through a plug, and each plug owns its own transport and authentication — the engine ships no API
 client, no auth flow, and no credentials for any tracker. No plug may commit credentials to the
-repo; config names only WHERE (e.g. a space/list), never secrets. (The ClickUp plug's instance of
+repo. A plug's config identifies WHERE **by ID** (e.g. a workspace, space and list ID), never
+secrets; a container's name is documentation and is never used to look the container up. (The ClickUp plug's instance of
 this: all ClickUp I/O goes through the connected ClickUp MCP server, which owns auth.)
 Rationale: the engine stays tracker-agnostic and credential-free; each integration's transport is
 isolated behind the plug boundary, so adding a tracker never touches the core.
@@ -61,8 +61,9 @@ a no-op observable (zero writes) rather than merely harmless.
 ### IV. Scaffolding-Only
 The engine and its plugs MUST live entirely under `.specify/`, `.claude/`, and per-feature
 manifests. No plug MUST introduce a reference to its tracker into shipped application source,
-product docs, or CI of the repo that adopts it. Runtime tracker IDs are confined to the per-feature
-manifest — the only place they are committed.
+product docs, or CI of the repo that adopts it. Tracker IDs are committed in exactly two places:
+the plug's repo-level config (the IDs of the containers it targets) and the per-feature manifest
+(the IDs of the items it created). Nowhere else.
 Rationale: an adopting repo's product and pipeline stay clean and tracker-agnostic; the engine and
 any plug are fully removable by deleting scaffolding.
 
@@ -136,4 +137,4 @@ is committed; a change that breaks an invariant is a defect. Complexity that app
 violating a principle MUST instead be justified and, if genuinely warranted, ratified as an
 explicit amendment first.
 
-**Version**: 2.1.0 | **Ratified**: 2026-07-07 | **Last Amended**: 2026-07-26
+**Version**: 3.0.0 | **Ratified**: 2026-07-07 | **Last Amended**: 2026-10-11

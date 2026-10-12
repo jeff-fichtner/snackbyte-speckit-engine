@@ -18,10 +18,15 @@ with no approved ruleset, the baked-in defaults (from 001/US3) apply unchanged.
 
 ## Steps
 
-1. **Inspect the real workspace** (read-only) via the ClickUp MCP tools:
-   - `clickup_get_workspace_hierarchy`, `clickup_get_list` (statuses), `clickup_get_custom_fields`.
-   - Learn: the list's actual statuses (for the six-state mapping), any custom fields, and how the
-     team's board is shaped.
+1. **Inspect the pinned list** (read-only, by ID) via the ClickUp MCP tools:
+   - Resolve the target with `.specify/extensions/clickup/scripts/bash/targets.sh resolve`. If its
+     `status` is not `ready` with `path: existing`, stop and say so: design rules need a pinned
+     `list-id`. Run `/speckit-clickup-provision` first.
+   - `clickup_get_list` (statuses) and `clickup_get_custom_fields`, each with `list_id` = the
+     pinned `listId` and `workspace_id` = `workspaceId`. Do not browse the hierarchy, and do not
+     look anything up by name.
+   - Learn: the list's actual statuses (for the six-state mapping, by name, the stated
+     exception) and any custom fields.
 
 2. **Propose a ruleset** — present, for the user's approval, a concrete proposal covering:
    - the six logical states → this list's actual status names (the `statuses:` mapping),

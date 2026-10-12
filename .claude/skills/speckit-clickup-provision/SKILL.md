@@ -1,6 +1,6 @@
 ---
 name: "speckit-clickup-provision"
-description: "Find-or-create the ClickUp space + shared list and record the target IDs and status mapping in the active feature's manifest."
+description: "Locate the pinned ClickUp list by ID (or create it in the pinned folder and pin it), then record the target IDs and status mapping in the active feature's manifest."
 argument-hint: "(no arguments)"
 compatibility: "Requires spec-kit project structure with .specify/ directory and the ClickUp MCP server connected"
 metadata:
@@ -11,33 +11,34 @@ disable-model-invocation: false
 ---
 
 Execute the ClickUp provision command. The authoritative command body lives at
-`.specify/extensions/clickup/commands/speckit.clickup.provision.md` — read it and follow
-its steps exactly.
+`.specify/extensions/clickup/commands/speckit.clickup.provision.md`. Read it and follow its
+steps exactly.
 
-Ensure the ClickUp target for this repo exists and record where it is, so later `sync` runs
-never have to discover or guess. Provisioning is separate from and earlier than sync; it is a
-near-no-op after the first feature (the shared list is reused). All ClickUp access is through
-the connected ClickUp MCP server — no API/auth code.
+Record where this feature's ClickUp card lives, by ID only. Containers come from the `*-id` keys in
+`clickup-config.yml`; names are comments and are never looked up. Every ClickUp call passes
+`workspace_id`. Statuses are the one stated exception: they are mapped by name inside the list
+located by ID.
 
 ## Steps
 
 1. Read the full command body at
    `.specify/extensions/clickup/commands/speckit.clickup.provision.md`.
-2. Resolve config first (placeholder → ask → remember): if `config.yml` has `enabled: false`,
-   silently no-op (the user already declined — never re-ask). If `space`/`list` are still
-   `<...>` placeholders, ask the user **once** for the space/list; save real values they give
-   (never ask again), or write `enabled: false` if they decline.
-3. Then follow the command verbatim: resolve the active feature and manifest, locate the space
-   via `clickup_get_workspace_hierarchy`, find-or-create the shared list, resolve the
-   `not-started`/`in-progress`/`done` status mapping from `clickup_get_list`, and write the
-   targets into the feature manifest via `manifest.sh set-targets`.
-4. Fail loud (stop, write nothing) on a missing/ambiguous space or a list whose statuses cannot
-   represent the three logical states distinctly — naming exactly what is missing.
+2. Run `.specify/extensions/clickup/scripts/bash/targets.sh resolve` and act on its `status`:
+   - `disabled`: silent no-op.
+   - `invalid`: stop with zero ClickUp calls and print its errors, which name the keys.
+   - `unconfigured`: ask once for IDs, or record a decline as `enabled: false`.
+   - `ready`: proceed.
+3. Follow the command verbatim:
+   - `path: existing`: `clickup_get_list` by `list_id` + `workspace_id`.
+   - `path: create`: `clickup_get_folder` by `folder_id`, then `clickup_create_list_in_folder`,
+     then `targets.sh pin-list` immediately.
+   - Then: map statuses by name, `manifest.sh set-targets`, and create the card in `open` with
+     `clickup_create_task` (`list_id`, `workspace_id`).
+4. Stop on a not-found ID, a failed pin, or a list whose statuses cannot represent three states,
+   naming exactly what is wrong. Make no other cross-checks.
 
 ## Done When
 
 - [ ] The command body was read and followed step by step.
-- [ ] The feature manifest has `listId` + `statusMapping` (or the run stopped with a clear,
-      named reason and wrote nothing).
-- [ ] What happened (space found, list found-or-created, resolved mapping — or the stop-reason)
-      was reported to the user.
+- [ ] No container was located by name; every ClickUp call passed `workspace_id`.
+- [ ] The manifest records the resolved IDs and status mapping (or the run stopped with a clear reason).

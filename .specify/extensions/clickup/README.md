@@ -6,10 +6,11 @@ drives the generic lifecycle, this plug turns those lifecycle events into real C
 
 **The tracker interface a plug implements** (what the engine asks any plug to do):
 
-- **resolve-target / status-mapping** — find-or-create the tracker's container and map the engine's
+- **resolve-target / status-mapping**: locate the tracker's container and map the engine's
   **six logical states** (`open · in-design · ready · in-development · in-review · done`) onto the
-  tracker's real statuses (here: provision the ClickUp space + shared list, map the six onto the
-  list's statuses, falling back to three where a list can't express six).
+  tracker's real statuses. Here: locate the pinned ClickUp list **by ID** (or create it in the
+  pinned folder and pin it), then map the six onto the list's statuses, falling back to three
+  where a list can't express six.
 - **create/update item** — materialize a feature and its user stories as tracker items.
 - **set-checklist** — render the feature's `tasks.md` lines onto the item.
 - **link-dependency** — reflect user-story dependencies.
@@ -55,24 +56,47 @@ Shared List (one per repo)
 
 Config is layered, highest wins: env (`SPECKIT_CLICKUP_<KEY>`) → `local-config.yml`
 (gitignored, machine-local) → [`clickup-config.yml`](clickup-config.yml) (committed,
-consumer-owned) → shipped defaults in `extension.yml`. Set your `space` and `list` names in
-`clickup-config.yml` (no IDs, no secrets — provision's ask-once flow writes it for you on an
-unconfigured repo). Both consumer files survive `specify extension update` (CLI config-rescue
-naming); everything else is replaced on update.
+consumer-owned) → shipped defaults in `extension.yml`. Both consumer files survive `specify
+extension update` (CLI config-rescue naming); everything else is replaced on update.
+
+Containers are located **by ID only**. Names are comments, never lookups. Provision's ask-once
+flow writes this for you on an unconfigured repo:
+
+```yaml
+# .specify/extensions/clickup/clickup-config.yml — IDs only; names belong in comments
+workspace-id: "<workspace id>"   # e.g. Workspace
+space-id: "<space id>"           # e.g. products
+list-id: "<list id>"             # e.g. karaoke / Roadmap
+```
+
+| Key | Required | Meaning |
+|---|---|---|
+| `workspace-id` | always | Workspace every ClickUp call is scoped to |
+| `space-id` | always | Space the list belongs to |
+| `list-id` | or `folder-id` + `new-list-name` | The shared list; authoritative |
+| `folder-id` + `new-list-name` | when there is no list yet | Provision creates the list in the folder, then rewrites `new-list-name` to the pinned `list-id` |
+| `statuses:` | no | Six logical states → status **names** on the list: the one stated exception, because ClickUp sets status by name |
+
+A list's URL holds two of the IDs: `app.clickup.com/<workspace-id>/v/l/li/<list-id>`. A missing
+required ID, a name key without its ID (`list: "Roadmap"`), or a non-numeric ID stops provision
+before any ClickUp call, naming the key. Resolution lives in
+[`scripts/bash/targets.sh`](scripts/bash/targets.sh) (unit-tested). Moving from a name-based
+config: [docs/MIGRATION.md](../../../docs/MIGRATION.md).
 
 ## Commands & hooks
 
 | Command | Hook | What it does |
 |---|---|---|
-| `/speckit-clickup-provision` | `after_specify` (required) | Find-or-create the space + shared list, resolve & record the status mapping and target IDs into the feature manifest; card created in `open`. |
+| `/speckit-clickup-provision` | `after_specify` (required) | Locate the pinned list by ID (or create it in the pinned folder and pin it), resolve & record the status mapping and target IDs into the feature manifest; card created in `open`. |
 | `/speckit-clickup-sync` | every lifecycle moment, required — `after_specify`, `after_tasks`, `after_analyze` (sets `analyzed` → `ready`), `before_implement` (sets `implementStarted` → `in-development`), `after_converge`, `before_verify`, `after_verify` (→ `in-review`), `after_close` (→ `done`) | Make the feature-card (body, US-subtasks, checklist, dependencies, status) match the repo. Idempotent — a no-op run makes zero ClickUp writes. Opt out per repo via `enabled: false` in config. |
 
 ## State
 
 Each feature carries a committed manifest at `specs/<feature>/.clickup-sync.json` holding the
 target IDs, the status mapping, the card + US-subtask IDs, and content hashes. It is the
-dedup index (create/update/skip) and the target locator — the **only** place runtime ClickUp
-IDs are committed. Nothing else in this package contains IDs or secrets.
+dedup index (create/update/skip) and the per-feature target locator. Committed ClickUp IDs live
+in exactly two places: the consumer's `clickup-config.yml` (target containers) and these
+manifests (created items). Nothing in this package contains IDs or secrets.
 
 ## Guarantees
 
@@ -86,7 +110,8 @@ IDs are committed. Nothing else in this package contains IDs or secrets.
 
 ## Repo-side helpers
 
-Deterministic logic (tasks.md parsing, status derivation, manifest I/O, hashing) lives in
-[`scripts/bash/`](scripts/bash/) and is unit-tested (`*.test.sh`). The command prompts own
+Deterministic logic is unit-tested (`*.test.sh`). Config resolution and the list pin live in this
+plug's [`scripts/bash/targets.sh`](scripts/bash/targets.sh). Tasks.md parsing, status derivation,
+manifest I/O and hashing live in the engine's `scripts/bash/`. The command prompts own
 only the ClickUp MCP orchestration, which is validated manually via the feature's
 `quickstart.md` against a real workspace.

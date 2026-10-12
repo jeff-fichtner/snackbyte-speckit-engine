@@ -32,7 +32,7 @@ provides:
   commands:
     - name: speckit.clickup.provision
       file: commands/speckit.clickup.provision.md
-      description: "Find-or-create the ClickUp space + shared list, record targets + the six-state status mapping, and create the feature-card in `open`"
+      description: "Locate the pinned ClickUp list by ID (or create it in the pinned folder and pin its ID), record targets + the six-state status mapping, and create the feature-card in `open`"
     - name: speckit.clickup.sync
       file: commands/speckit.clickup.sync.md
       description: "Make the feature's card (body, US-subtasks, checklist, dependencies, six-state status) match the repo; idempotent, one-way; runs on every command"

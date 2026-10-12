@@ -41,11 +41,12 @@ on sign-off).
   files exist — see docs/MIGRATION.md.) If the merged view has `enabled: false` (the user
   previously declined), **silently do nothing and exit 0** — do not ask, do not sync. (Matches
   provision's decline state.)
-- The manifest has `listId` and `statusMapping`. If not, **refuse** and instruct the user to
-  run `/speckit-clickup-provision` first — do NOT create the list or guess a mapping here.
-  Check with:
+- The manifest has `workspaceId`, `listId` and `statusMapping`. If not, **refuse** and tell the
+  user to run `/speckit-clickup-provision` first. Do NOT create the list, look one up, or guess a
+  mapping here. Check with:
 
   ```bash
+  .specify/extensions/engine/scripts/bash/manifest.sh get workspaceId
   .specify/extensions/engine/scripts/bash/manifest.sh get listId
   .specify/extensions/engine/scripts/bash/manifest.sh get statusMapping
   ```
@@ -122,13 +123,18 @@ re-running with no repo change yields identical hashes → every element skips (
 
 ## Diff and apply (toward the repo — one-way)
 
+Every ClickUp call below passes `workspace_id` = the manifest's `workspaceId`, and addresses the
+list, card and subtasks by their recorded IDs. Nothing is located by name. The one stated
+exception is status, which is set by name from `statusMapping` (ClickUp sets status by name,
+within the ID-located list).
+
 Compare each freshly-derived hash to the manifest (`get-card`, `get-us <US>`). For each
 element: **unchanged** (hash equal) → skip, no MCP call; **new** → create; **changed** → update.
 The repo is authoritative: whatever the derived content says overwrites ClickUp. A hand-edit in
 ClickUp to an owned element is reverted on the next sync (never merged back into the repo).
 
 1. **Feature-card**:
-   - No `card.id` in manifest → `clickup_create_task` in `listId` with `name` = feature title,
+   - No `card.id` in manifest → `clickup_create_task` with `list_id` = `listId`, `workspace_id`, `name` = feature title,
      `markdown_description` = card body, `status` = `statusMapping[derived]`. Record via
      `manifest.sh set-card --id <id> --hash <hash>`.
    - Have `card.id`, hash changed → `clickup_update_task` (name/description/status). Refresh hash.

@@ -1,3 +1,35 @@
+# Migrating to ID-only ClickUp config (006)
+
+From the release that ships spec 006, the ClickUp plug locates containers **by ID only**. A
+name-based `clickup-config.yml` (`space: "…"`, `list: "…"`) now **stops provision before any
+ClickUp call** and names the keys to set. Existing features are unaffected, because sync, verify
+and close already address ClickUp by the IDs in each feature's manifest. Only the **next new
+spec** needs the config change.
+
+## Steps
+
+1. **Find your list ID.** It is the `listId` in any of your `specs/*/.clickup-sync.json`
+   manifests (check it is the list you mean), or the tail of the list's URL:
+   `app.clickup.com/<workspace-id>/v/l/li/<list-id>`.
+2. **Rewrite `.specify/extensions/clickup/clickup-config.yml`**. Keep the names as comments:
+
+   ```yaml
+   workspace-id: "90141363864"   # Workspace
+   space-id: "90146746995"       # products
+   list-id: "901421288946"       # karaoke / Roadmap
+   statuses:                     # unchanged: mapped by name (the stated exception)
+     open: "backlog"
+   ```
+
+   The manifest's `workspaceId` and `spaceId` are the other two values.
+3. **Remove the name keys** (`space:`, `list:`, any `folder:`) or turn them into comments. A
+   name key without its ID is an error. Beside its ID it is ignored.
+4. **No list yet?** Use `folder-id: "<id>"` + `new-list-name: "<name>"` in place of `list-id`.
+   The first provision creates the list in that folder and pins its ID.
+5. **Update the extension** (`specify extension update`) and commit the config.
+
+---
+
 # Migrating a pre-release install to the catalog (FR-013)
 
 Applies to repos that received the engine (or the old `clickup-sync` plug) by **hand-copying**
@@ -28,8 +60,8 @@ existing ClickUp cards reconcile without duplicates when you sync again.
    for e in engine clickup git-lifecycle review-loop; do specify extension add "$e"; done
    ```
 4. **Restore your config under the new names** (preserved across future updates):
-   - `.specify/extensions/clickup/clickup-config.yml` (committed) — `space`, `list`,
-     optional `statuses:` block
+   - `.specify/extensions/clickup/clickup-config.yml` (committed): the target IDs (see the ID-only
+     section above) and the optional `statuses:` block
    - `.specify/extensions/clickup/local-config.yml` (gitignored) — machine-local overrides only
    Do NOT recreate `config.yml`/`config.local.yml`; those names are replaced/orphaned by
    updates.

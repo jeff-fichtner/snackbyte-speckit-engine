@@ -28,7 +28,8 @@ REPO_SLUG="jeff-fichtner/snackbyte-speckit-engine"
 
 # Names that must never ship, and content that must never leak (this repo's real ClickUp ids).
 FORBIDDEN_NAMES=(config.local.yml local-config.yml clickup-config.yml)
-FORBIDDEN_CONTENT=(90141363864 90146433590 901417991049)
+# This repo's real ClickUp IDs, past (space/list before the 2026 reorg) and current (006 re-pin).
+FORBIDDEN_CONTENT=(90141363864 90146433590 901417991049 90146747064 901411097129 901418532190)
 
 die() { echo "ERROR: $*" >&2; exit 1; }
 
