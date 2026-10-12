@@ -57,10 +57,11 @@ the `package.json` at the root exists only to provide the local check gate. Two 
 **required** lifecycle hooks in [`.specify/extensions.yml`](.specify/extensions.yml) (they run
 automatically on every command; the plug's own config is where a repo opts out):
 
-- **`/speckit-clickup-provision`** (`after_specify`) — find-or-create the ClickUp space + shared
-  list, resolve the status mapping, record targets in the feature manifest, create the card in
-  `open`. On an unconfigured repo it asks once for the space/list, saves what you give it, and
-  remembers a decline (`enabled: false`) so it never re-asks.
+- **`/speckit-clickup-provision`** (`after_specify`): locate the pinned ClickUp list **by ID** (or
+  create it in the pinned folder and pin its ID), resolve the status mapping, record targets in
+  the feature manifest, and create the card in `open`. On an unconfigured repo it asks once for
+  the IDs, saves what you give it, and remembers a decline (`enabled: false`) so it never
+  re-asks.
 - **`/speckit-clickup-sync`** (every lifecycle event: `after_specify` through `after_close`) —
   make the feature's ClickUp card (body, subtasks, checklist, dependencies, status) match the
   repo. One-way, idempotent (a no-op run makes zero ClickUp writes), MCP-only.
@@ -70,15 +71,23 @@ Configure the ClickUp plug in
 (committed, consumer-owned — created by provision's ask-once flow on an unconfigured repo):
 
 ```yaml
-space: "<your-space-name>"        # ClickUp space the shared list lives in
-list:  "<your-shared-list-name>"  # the one shared list all feature-cards go into
+# .specify/extensions/clickup/clickup-config.yml — IDs only; names belong in comments
+workspace-id: "<workspace id>"   # e.g. Workspace
+space-id: "<space id>"           # e.g. products
+list-id: "<list id>"             # e.g. karaoke / Roadmap
 ```
 
-No IDs or credentials go here — the connected ClickUp MCP server handles auth, and runtime IDs
-live only in each feature's `specs/<feature>/.clickup-sync.json` manifest. Machine-local
-overrides go in `local-config.yml` (gitignored). Both files survive `specify extension update`;
-everything else in the extension is replaced on update. In *this* repo the config points at the
-`snackbyte-speckit-engine` ClickUp space.
+Containers are located **by ID only**. A name is never a lookup, and a name key such as
+`list: "Roadmap"` without its `list-id` is an error. A list's URL holds two of the IDs:
+`app.clickup.com/<workspace-id>/v/l/li/<list-id>`. For a brand-new product with no list yet, set
+`folder-id` + `new-list-name` instead of `list-id`. The first provision creates the list there and
+pins its ID. Status mapping (`statuses:`) is by name: the one stated exception, because ClickUp
+sets status by name.
+
+No credentials go here; the connected ClickUp MCP server handles auth. Machine-local overrides go
+in `local-config.yml` (gitignored). Both files survive `specify extension update`; everything else
+in the extension is replaced on update. In *this* repo the config pins
+`platforms / speckit-engine / Roadmap`.
 
 ## Install into your repo
 

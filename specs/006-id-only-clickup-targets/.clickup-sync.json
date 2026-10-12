@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1",
+  "feature": "006-id-only-clickup-targets",
+  "workspaceId": "90141363864",
+  "spaceId": "90146747064",
+  "listId": "901418532190",
+  "statusMapping": {
+    "open": "backlog",
+    "in-design": "in design",
+    "ready": "ready for development",
+    "in-development": "in development",
+    "in-review": "in review",
+    "done": "shipped"
+  },
+  "card": {
+    "id": "86bcgk14k",
+    "hash": "sha256:10a7be4cc995dba270c938f4c76b007e11ad3675dff68ff4a7f4a337f2252aa8",
+    "provenanceHash": "sha256:2f22ae42527c83414052790a79bf87c45ad2b7a68606361428cd6e04b4ebdbf4"
+  },
+  "userStories": [
+    {
+      "us": "US1",
+      "id": "86bcgk15v",
+      "hash": "sha256:78a721bc630ed727d8f57304d4b2b274c09c7199ea96f53fb2cf4e8302c5ac25",
+      "dependsOn": []
+    },
+    {
+      "us": "US2",
+      "id": "86bcgk166",
+      "hash": "sha256:f42b8d5feac593201f67aeee8e86c6ae976eabf10d37b87cc4adc688b2d77ca6",
+      "dependsOn": [
+        "US1"
+      ]
+    },
+    {
+      "us": "US3",
+      "id": "86bcgk169",
+      "hash": "sha256:c778fe4b883980e0ef64b47d136765fc98473902f22d8a778614e11d2ed14fbf",
+      "dependsOn": [
+        "US1",
+        "US2"
+      ]
+    },
+    {
+      "us": "US4",
+      "id": "86bcgk16f",
+      "hash": "sha256:a474bcd6dd59801a8d1da28c394f2c05f1bb0a9f24ed2c83829cf1d29374674e",
+      "dependsOn": [
+        "US1",
+        "US2",
+        "US3"
+      ]
+    }
+  ],
+  "lifecycle": {
+    "analyzed": true,
+    "implementStarted": true,
+    "verifyPassed": true
+  }
+}

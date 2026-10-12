@@ -14,8 +14,9 @@ Execute the ClickUp design-rules command. The authoritative command body lives a
 `.specify/extensions/clickup/commands/speckit.clickup.design-rules.md` — read it and follow its
 steps exactly.
 
-Inspect the real ClickUp workspace (statuses, custom fields, board shape) via the ClickUp MCP read
-tools, then **propose** a project-specific sync ruleset (six-state status mapping, US→subtask/tag/list
+Inspect the pinned list by ID (statuses, custom fields) via `clickup_get_list` and
+`clickup_get_custom_fields`, each with `list_id` and `workspace_id`; never browse the hierarchy or
+look anything up by name. Then **propose** a project-specific sync ruleset (six-state status mapping, US→subtask/tag/list
 choice, card-body emphasis, custom-field usage) for **explicit human approval**. On approval, record
 it as config the sync honors; with no ruleset, the baked-in defaults apply unchanged. Reject any rule
 that would violate a constitution principle (e.g. two-way sync). Never silently reshape the board.

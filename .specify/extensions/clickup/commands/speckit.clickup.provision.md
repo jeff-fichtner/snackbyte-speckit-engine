@@ -1,49 +1,56 @@
 ---
-description: "Find-or-create the ClickUp space + shared list and record the target IDs and status mapping in the active feature's manifest"
+description: "Locate the pinned ClickUp list by ID (or create it in the pinned folder and pin it), then record the target IDs and status mapping in the active feature's manifest"
 ---
 
 # ClickUp Sync — Provision
 
-Ensure the ClickUp target for this repo exists and record where it is, so later `sync` runs
-never have to discover or guess. Provisioning is separate from and earlier than sync; it is a
-near-no-op after the first feature (the shared list is reused). All ClickUp access is through
-the connected ClickUp MCP server — no API/auth code.
+Record where this feature's ClickUp card lives, so later `sync` runs never have to discover or
+guess. Provisioning runs once per feature, before sync. After a repo's first feature it is a pure
+reuse of the pinned list. All ClickUp access goes through the connected ClickUp MCP server; the
+plug has no API or auth code of its own.
+
+**Containers are located by ID only.** The workspace, space, folder and list come from the `*-id`
+keys in config. Names are comments for humans: a name is never a lookup, and no step browses the
+hierarchy or passes a name to a ClickUp tool. **Every ClickUp call passes `workspace_id`.**
+
+The one stated exception is **statuses**, which are mapped by name. ClickUp sets a task's status by
+its name, and names are only ever resolved inside the list already located by ID, where status
+names are unique.
 
 ## Preconditions
 
-- **The engine extension is installed** — `.specify/extensions/engine/scripts/bash/manifest.sh`
+- **The engine extension is installed**: `.specify/extensions/engine/scripts/bash/manifest.sh`
   exists. If not, **stop immediately with zero tracker writes**: "The clickup plug requires the
   engine extension. Install it: `specify extension add engine`."
 - The ClickUp MCP server is connected.
-- The config resolution below yields real `space`/`list` values (or the ask-once flow obtains
-  them).
 
-## Config resolution (layered → absent → ask → remember)
+## Resolve the target (no ClickUp calls)
 
-Config is layered, highest wins: env (`SPECKIT_CLICKUP_<KEY>`) > `local-config.yml`
-(gitignored, machine-local) > `clickup-config.yml` (committed, consumer-owned) >
-`extension.yml` `config.defaults`. The shipped extension carries **no** space/list — an
-unconfigured repo simply has no values yet. (Migration grace: legacy
-`config.local.yml`/`config.yml` are read only when none of the new files exist.) Resolve
-`space` and `list` from the merged view:
+```bash
+.specify/extensions/clickup/scripts/bash/targets.sh resolve
+```
 
-1. If the merged view has `enabled: false`, the user has previously **declined** ClickUp sync
-   for this repo. **Silently do nothing and exit 0** — do NOT ask again. (This is the "know not
-   to ask them again" state.)
-2. If both `space` and `list` resolve to real values (absent ≠ real; a leftover `<...>`
-   placeholder from a migrated repo also ≠ real), use them — proceed to the Steps below. Do
-   not ask.
-3. Otherwise, **ask the user once**: "This repo isn't wired to a ClickUp space/list yet. Give
-   me the ClickUp space name and shared-list name to sync into, or say you don't want ClickUp
-   sync here."
-   - **If they provide values** → write them into **`clickup-config.yml`** (committed,
-     repo-level — the whole team is provisioned once; space/list names are locations, never
-     secrets). Machine-personal deviations belong in `local-config.yml`. The saved values mean
-     this question is never asked again.
-   - **If they decline** → set `enabled: false` in `clickup-config.yml` and record a short
-     note, then exit 0. Never ask again on subsequent runs (handled by rule 1). Do not sync.
-   - Only ask **once per run**; if the user gives an unusable answer, stop with a clear message
-     rather than re-prompting in a loop.
+The script applies the layered config (env `SPECKIT_CLICKUP_<KEY>` > `local-config.yml` >
+`clickup-config.yml` > shipped defaults) and the ID-only rules. Act on its `status`:
+
+- **`disabled`**: the repo declined ClickUp sync. **Silently do nothing and exit 0.** Do not ask
+  again.
+- **`invalid`** (exit 1): **stop with zero ClickUp calls.** Print every line of `errors` as-is.
+  Each one names the key to set. Point to the plug README's *Configure* section (where each ID is
+  visible in ClickUp) and to `docs/MIGRATION.md` for a name-based config.
+- **`unconfigured`**: nothing is set yet. **Ask the user once**: "This repo isn't wired to ClickUp
+  yet. Give me the workspace ID and space ID, plus either the list ID, or a folder ID and a name
+  for a new list there. Or say you don't want ClickUp sync here. (A list's URL is
+  `app.clickup.com/<workspace-id>/v/l/li/<list-id>`; a space's or folder's ID is in its URL.)"
+  - **If they give IDs**: write them to **`clickup-config.yml`** as `workspace-id`, `space-id`,
+    and `list-id` (or `folder-id` + `new-list-name`). Put any names they mention in comments.
+    Re-run `targets.sh resolve`. If it is still `invalid`, stop and print its errors; do not
+    re-prompt.
+  - **If they decline**: set `enabled: false` in `clickup-config.yml` with a short note, then exit
+    0. Never ask again.
+  - Ask **once per run**.
+- **`ready`**: proceed with its `workspaceId`, `spaceId`, and either `listId` (`path: existing`)
+  or `folderId` + `newListName` (`path: create`).
 
 ## Steps
 
@@ -53,67 +60,87 @@ unconfigured repo simply has no values yet. (Migration grace: legacy
    .specify/extensions/engine/scripts/bash/manifest.sh path
    ```
 
-2. **Read config** — use the `space`/`list` values resolved by the "Config resolution" block
-   above (placeholders are already handled there; if you reached this step they are real).
+2. **Locate or create the list, by ID**:
+   - **`path: existing`**: call `clickup_get_list` with `list_id` = `listId` and `workspace_id` =
+     `workspaceId`. If ClickUp reports it not found, **stop** and print `list-id: <listId> not
+     found in workspace <workspaceId>`. Otherwise keep the response; its statuses feed step 3.
+   - **`path: create`**:
+     1. Call `clickup_get_folder` with `folder_id` = `folderId` and `workspace_id`. If ClickUp
+        reports it not found, **stop** and print `folder-id: <folderId> not found in workspace
+        <workspaceId>`.
+     2. Call `clickup_create_list_in_folder` with `folder_id` = `folderId`, `name` =
+        `newListName` and `workspace_id`. Record the new list's ID.
+     3. **Pin it immediately**, before any other ClickUp write:
 
-3. **Locate the space** — call the ClickUp MCP tool `clickup_get_workspace_hierarchy`
-   (`max_depth: "2"`). Find the space whose name matches `config.space`.
-   - **0 matches**: stop and tell the user the space does not exist and must be created (or the
-     name corrected). Do not create a space automatically.
-   - **>1 matches** (ambiguous): stop and ask the user to disambiguate; do not guess.
-   - **1 match**: record its id and workspace id.
+        ```bash
+        .specify/extensions/clickup/scripts/bash/targets.sh pin-list --id <new list id> --name "<newListName>"
+        ```
 
-4. **Find-or-create the shared list** under that space:
-   - If a list named `config.list` already exists under the space (from the hierarchy), adopt
-     its id (no create — this is the reuse path for the 2nd+ feature).
-   - Otherwise call `clickup_create_task`'s sibling `clickup_create_list` with
-     `name: config.list`, `space_id: <space id>`; record the new list id.
+        This rewrites `new-list-name` in `clickup-config.yml` to `list-id: "<id>"  # <name>`,
+        so every later feature reuses the list by ID. If the pin fails, **stop with no further
+        ClickUp writes**. Print the new list's ID and the exact line to add:
+        `list-id: "<id>"  # <name>`.
+     4. Call `clickup_get_list` with the new `list_id` and `workspace_id` to read its statuses.
 
-5. **Resolve the six-state status mapping** — read the list's available statuses (via
-   `clickup_get_list`) and map the engine's **six logical states** onto real status names:
+   Make no other checks. The configured IDs are authoritative.
+
+3. **Resolve the six-state status mapping**, by name within this list (the stated exception).
+   Map the engine's six logical states onto the list's real status names:
    `open · in-design · ready · in-development · in-review · done`.
-   - **Prefer the merged config's `statuses:` block** if present — it explicitly names the actual
-     status for each logical state. Validate every named status actually exists on the list;
-     if one doesn't, **stop** and name the mismatch.
-   - **Otherwise resolve a best-effort mapping** from the list's real statuses (e.g. an open-type
+   - **Prefer the merged config's `statuses:` block** if present. It names the actual status for
+     each logical state. Every named status must exist on the list; if one doesn't, **stop** and
+     name the mismatch.
+   - **Otherwise resolve a best-effort mapping** from the list's real statuses: an open-type
      status → `open`, a done/closed-type → `done`, distinct middle statuses → the in-between
-     states in order).
-   - **Degrade, don't fail**: a list without six distinct statuses maps to the three-state floor
-     (not-started / in-progress / done) — `open`/`in-design`/`ready` → the open status,
-     `in-development`/`in-review` → a middle status, `done` → the done status. Use
-     `status-map.sh` semantics. The list only needs to distinguish those three; **stop**
-     (fail-loud) only if it cannot even represent three distinct states, naming what it needs.
+     states in order.
+   - **Degrade, don't fail**. A list without six distinct statuses maps to the three-state floor
+     (not-started / in-progress / done), using `status-map.sh` semantics:
+     - `open`/`in-design`/`ready` → the open status
+     - `in-development`/`in-review` → a middle status
+     - `done` → the done status
 
-6. **Write the manifest targets** (merge, preserving any existing `card`/`userStories`). Pass the
-   full six-state mapping (or the degraded three-state one) as the status map:
+     **Stop** only if the list cannot represent three distinct states, naming what it needs.
+
+4. **Write the manifest targets** from the resolved IDs (merge, preserving any existing
+   `card`/`userStories`):
 
    ```bash
    .specify/extensions/engine/scripts/bash/manifest.sh set-targets \
-     --workspace "<workspace id>" --space "<space id>" --list "<list id>" \
+     --workspace "<workspaceId>" --space "<spaceId>" --list "<list id>" \
      --status-map '{"open":"<name>","in-design":"<name>","ready":"<name>","in-development":"<name>","in-review":"<name>","done":"<name>"}'
    ```
 
-7. **Create the feature-card in `open`** (FR-013a) — so the `open → in-design` transition at
-   `/speckit-specify` is itself visible as "design work started". Derive the desired state with
-   `derive-status.sh --card` (with no spec yet this yields `open`), map it via
-   `status-map.sh resolve --logical open --map <statusMapping>`, and:
-   - `clickup_create_task` in `listId` with `name` = feature title, a minimal body, and
-     `status` = the mapped `open` status.
-   - Record it: `manifest.sh set-card --id <id> --hash <hash>` (hash the derived
-     card content per the sync contract). If a `card.id` already exists in the manifest, this
-     is a re-provision — do NOT create a second card.
+5. **Create the feature-card in `open`** (FR-013a), so the `open → in-design` transition at
+   `/speckit-specify` is itself visible as "design work started".
+   - Derive the desired state with `derive-status.sh --card`. With no spec yet this yields `open`.
+   - Map it with `status-map.sh resolve --logical open --map <statusMapping>`.
+   - Call `clickup_create_task` with `list_id` = the list, `workspace_id`, `name` = the feature
+     title, a minimal body, and `status` = the mapped `open` status.
+   - Record it: `manifest.sh set-card --id <id> --hash <hash>` (hash the derived card content per
+     the sync contract).
+   - If a `card.id` already exists in the manifest, this is a re-provision: do NOT create a
+     second card.
 
-8. **Report** what happened: space found, list found-or-created, the resolved six-state (or
-   degraded three-state) mapping, the card created in `open` — or the stop-reason.
+6. **Report**:
+   - the list used (ID; "pinned" when the create path made it)
+   - the resolved six-state (or degraded three-state) mapping
+   - the card created in `open`
+
+   Or report the stop-reason. When the create path pinned a list, say that
+   `clickup-config.yml` changed and is committed with the spec at the pre-implementation
+   checkpoint.
 
 ## Idempotence
 
-Re-running finds the same space + list and rewrites the same target values; it creates no
-duplicate space or list (the 2nd+ feature is a pure reuse).
+Re-running uses the same IDs and rewrites the same target values. The create path runs at most
+once per repo: after the pin, `targets.sh resolve` returns `path: existing`.
 
 ## Never
 
-- Never creates a ClickUp space automatically (only find; instruct if missing).
-- Never writes to the repo other than the feature manifest and its own plug config (the ask-once write to `clickup-config.yml`).
-- Never touches unrelated cards/tasks in the list.
-- Never proceeds past an ambiguous space or an insufficient status set — it stops.
+- Never locates a container by name, never browses the workspace hierarchy, and never passes a
+  name argument to a ClickUp tool. `id-only-guard.sh` enforces this in the check gate.
+- Never creates a space or a folder, and never creates a list outside the pinned folder.
+- Never writes to the repo other than the feature manifest and its own plug config (the ask-once
+  write and the list pin).
+- Never touches unrelated cards or tasks in the list.
+- Never proceeds past an invalid config, a not-found ID, or an insufficient status set: it stops.

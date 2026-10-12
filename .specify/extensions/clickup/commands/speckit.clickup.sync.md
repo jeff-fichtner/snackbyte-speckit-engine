@@ -34,18 +34,24 @@ on sign-off).
   engine extension. Install it: `specify extension add engine`." (The CLI does not enforce
   `requires.extensions` — this guard is the enforcement.)
 - The ClickUp MCP server is connected.
-- ClickUp sync is not disabled for this repo. Config is layered, highest wins:
-  env (`SPECKIT_CLICKUP_<KEY>`) > `local-config.yml` (gitignored, machine-local) >
-  `clickup-config.yml` (committed, consumer-owned) > `extension.yml` `config.defaults`.
-  (Migration grace: legacy `config.local.yml`/`config.yml` are read only when none of the new
-  files exist — see docs/MIGRATION.md.) If the merged view has `enabled: false` (the user
-  previously declined), **silently do nothing and exit 0** — do not ask, do not sync. (Matches
-  provision's decline state.)
-- The manifest has `listId` and `statusMapping`. If not, **refuse** and instruct the user to
-  run `/speckit-clickup-provision` first — do NOT create the list or guess a mapping here.
-  Check with:
+- ClickUp sync is not disabled for this repo. Ask the plug's resolver, which applies the
+  layered config (env > `local-config.yml` > `clickup-config.yml` > defaults) exactly as
+  provision does:
 
   ```bash
+  .specify/extensions/clickup/scripts/bash/targets.sh resolve
+  ```
+
+  If its `status` is `disabled` (the user declined), **silently do nothing and exit 0**. Do not
+  ask, do not sync. Any other status means continue, **even `invalid`**. Sync addresses ClickUp by
+  the IDs in the feature manifest, never by config, so a config still awaiting migration only
+  matters to the next provision.
+- The manifest has `workspaceId`, `listId` and `statusMapping`. If not, **refuse** and tell the
+  user to run `/speckit-clickup-provision` first. Do NOT create the list, look one up, or guess a
+  mapping here. Check with:
+
+  ```bash
+  .specify/extensions/engine/scripts/bash/manifest.sh get workspaceId
   .specify/extensions/engine/scripts/bash/manifest.sh get listId
   .specify/extensions/engine/scripts/bash/manifest.sh get statusMapping
   ```
@@ -122,13 +128,18 @@ re-running with no repo change yields identical hashes → every element skips (
 
 ## Diff and apply (toward the repo — one-way)
 
+Every ClickUp call below passes `workspace_id` = the manifest's `workspaceId`, and addresses the
+list, card and subtasks by their recorded IDs. Nothing is located by name. The one stated
+exception is status, which is set by name from `statusMapping` (ClickUp sets status by name,
+within the ID-located list).
+
 Compare each freshly-derived hash to the manifest (`get-card`, `get-us <US>`). For each
 element: **unchanged** (hash equal) → skip, no MCP call; **new** → create; **changed** → update.
 The repo is authoritative: whatever the derived content says overwrites ClickUp. A hand-edit in
 ClickUp to an owned element is reverted on the next sync (never merged back into the repo).
 
 1. **Feature-card**:
-   - No `card.id` in manifest → `clickup_create_task` in `listId` with `name` = feature title,
+   - No `card.id` in manifest → `clickup_create_task` with `list_id` = `listId`, `workspace_id`, `name` = feature title,
      `markdown_description` = card body, `status` = `statusMapping[derived]`. Record via
      `manifest.sh set-card --id <id> --hash <hash>`.
    - Have `card.id`, hash changed → `clickup_update_task` (name/description/status). Refresh hash.
