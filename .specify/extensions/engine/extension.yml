@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: engine
   name: "Spec Kit Lifecycle Engine"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "The tracker-agnostic Spec Kit lifecycle engine. Keeps the lifecycle moving on its own — required hooks chain specify→clarify, plan→tasks→analyze, and implement→converge→verify, leaving only clarify→plan, analyze→implement, and close as deliberate human steps. Derives a feature's six-state lifecycle (open→in-design→ready→in-development→in-review→done) from repo artifacts and recorded lifecycle markers, parses tasks.md, maps logical states onto a tracker's real status names (with a three-state fallback), keeps the idempotence manifest, renders commit provenance, and drives the verify + close-out ceremonies. Talks to NO tracker itself — tracker I/O belongs to plugs (e.g. the clickup plug)."
   author: snackbyte
   license: MIT

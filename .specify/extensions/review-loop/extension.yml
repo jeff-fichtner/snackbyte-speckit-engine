@@ -10,7 +10,7 @@ extension:
   # every command below (`speckit.<id>.<verb>`).
   id: review-loop
   name: "Review Loop"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "The engine's review stage (Constitution VII: work → self-review → self-test → handoff) — one recursive loop with three targets: `spec` reviews a just-written spec.md; `analysis` applies /speckit-analyze's cross-artifact findings to spec/plan/tasks and re-checks until clean (formerly the analyze-autofix extension); `code` reviews implemented code + tests for /speckit-engine-verify. Fixes every issue with a single obvious correct resolution, never decides product questions, always terminates, and ends with a doctrine-shaped handoff."
   author: snackbyte
   license: MIT

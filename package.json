@@ -1,6 +1,6 @@
 {
   "name": "snackbyte-speckit-engine",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
   "description": "snackbyte-speckit-engine — a Spec Kit lifecycle engine with swappable tracker plugs (ClickUp is the first plug). This package.json exists only to provide the local check gate (check:all / test:release); the engine and its plugs have no Node runtime dependency.",
   "scripts": {

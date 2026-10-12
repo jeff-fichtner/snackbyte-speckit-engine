@@ -3,7 +3,7 @@ schema_version: "1.0"
 extension:
   id: git-lifecycle
   name: "Git Lifecycle"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "Git operations at Spec Kit lifecycle points: prepare a clean working tree + feature branch before specifying, and checkpoint the feature's spec artifacts before implementation. Merged from the former git-specify-branch and git-commit extensions — renamed from id `git` (2026-07-27): spec-kit BUNDLES its own `git` extension, so `extension add git` resolves to the bundled one and ours could never install by that name — verified live during 003 US2 E2E."
   author: snackbyte
   license: MIT

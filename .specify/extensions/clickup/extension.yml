@@ -8,7 +8,7 @@ extension:
   # back to `clickup-sync` without renaming every command with it.
   id: clickup
   name: "ClickUp Plug"
-  version: "1.0.0"
+  version: "2.0.0"
   description: "The ClickUp tracker plug for snackbyte-speckit-engine. Mirrors each Spec Kit feature into ClickUp as one feature-card in a shared list, with a subtask per user story (native dependency links), a markdown checkbox list of the tasks.md lines, a verbose body, and the engine's six-state lifecycle status (open→in-design→ready→in-development→in-review→done) advancing on every command. One-way (repo → ClickUp), idempotent, MCP-only. All deterministic lifecycle logic lives in the `engine` extension; this plug only orchestrates ClickUp MCP calls."
   author: snackbyte
   license: MIT
