@@ -7,9 +7,10 @@ description: "Stage and commit the current feature's Spec Kit artifacts as a pre
 Capture the current feature's Spec Kit planning state in git history before
 implementation begins. This stages the feature's spec directory
 (`specs/<feature>/`: `spec.md`, `plan.md`, `tasks.md`, `research.md`,
-`data-model.md`, `contracts/`, checklists, etc.). It also stages any repo-level
-extension config the lifecycle changed: `.specify/extensions/*/*-config.yml`, such
-as a list ID a tracker plug pinned at provision. It commits all of that as one clean
+`data-model.md`, `contracts/`, checklists, etc.). It also stages any changed
+repo-level extension config, `.specify/extensions/*/*-config.yml`, such as a list
+ID a tracker plug pinned at provision. A hand edit to one of those files during
+the lifecycle is checkpointed too. It commits all of that as one clean
 checkpoint and leaves any unrelated working-tree changes untouched.
 
 ## Behavior

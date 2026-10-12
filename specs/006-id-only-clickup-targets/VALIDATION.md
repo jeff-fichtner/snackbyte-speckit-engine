@@ -10,8 +10,8 @@ extensions installed, spec-kit CLI 1.0.8). Scenario numbers are those in
 | Check | Result |
 |---|---|
 | `npm run check:all` | **10 files passed, 0 failed** |
-| `targets.test.sh` | 43 checks, all pass, under bash 5 and macOS `/bin/bash` 3.2.57 |
-| `id-only-guard.test.sh` | 9 checks: G1–G4 fixtures fail, clean fixture passes, the real repo passes |
+| `targets.test.sh` | 51 checks, all pass, under bash 5 and macOS `/bin/bash` 3.2.57 |
+| `id-only-guard.test.sh` | 11 checks: G1–G4 fixtures fail, clean fixture passes, bad args exit 2, the real repo passes |
 | `commit-spec-artifacts.test.sh` | 6 checks, under bash 5 and 3.2 |
 | Release dry run (`2.0.0`) | 4 archives, **scan clean** with the extended `FORBIDDEN_CONTENT` |
 | Shipped `scripts/bash/targets.sh` | Present in `clickup-2.0.0.zip`, mode `-rwxr-xr-x` |
@@ -36,6 +36,31 @@ extensions installed, spec-kit CLI 1.0.8). Scenario numbers are those in
   pinned with a real tab. It now uses `ENVIRON`, with a regression test.
 - `pin-list`'s message printed an unnormalised `scripts/bash/../..` path. It now prints the
   resolved config dir.
+
+Local `/code-review` (medium) on the branch: 10 findings, 6 fixed with tests, 1 doc wording,
+3 dismissed.
+
+Fixed:
+- On a legacy `config.yml` layout, `pin-list` refused **after** the list was created. It now
+  pins into the committed layer `resolve` reads, creating it if missing. Grace mode applies only
+  when a legacy file exists.
+- `pin-list` changed the file's mode from 0644 to 0600 (via `mv` of a `mktemp` file). It now
+  rewrites in place.
+- A placeholder `list-id` line below the pin shadowed it. The reader now takes the last *real*
+  value.
+- `enabled: no` / `off` / `0` did not opt out. They now do.
+- Sync re-described the config rules in prose. It now asks `targets.sh resolve` and stops only on
+  `disabled`, so an un-migrated config never blocks sync of an existing feature.
+- The guard reported clean for a missing `--skills` dir and crashed on a flag without a value.
+  Both now exit 2.
+
+Doc wording: the checkpoint commits *any* changed `*-config.yml`, including deliberate hand edits.
+The docs now say so.
+
+Dismissed:
+- space-id isn't cross-checked: Jeff's no-cross-checks ruling.
+- An empty env value doesn't clear a key: by design, since empty means absent.
+- G4 is file-level: a known limit of a text guard; each command body states the rule.
 
 ## Dogfood
 

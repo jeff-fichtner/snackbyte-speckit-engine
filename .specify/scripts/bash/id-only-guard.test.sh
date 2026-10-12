@@ -70,6 +70,8 @@ o="$(guard "$r")"
 grep -q 'speckit-clickup-x/SKILL.md:1: G1' <<<"$o" && ok "skill mirrors are scanned too" || bad "skill" "$o"
 
 o="$(bash "$G" --bogus 2>&1)"; [[ $? == 2 ]] && ok "unknown flag → exit 2" || bad "usage" "$o"
+o="$(bash "$G" --skills "$TMP/nope" 2>&1)"; [[ $? == 2 ]] && ok "missing --skills dir → exit 2 (never a silent clean)" || bad "skills-missing" "$o"
+o="$(bash "$G" --commands 2>&1)"; [[ $? == 2 ]] && ok "flag without a value → exit 2" || bad "flag-novalue" "$o"
 
 o="$(bash "$G" 2>&1)"; rc=$?
 [[ $rc == 0 ]] && ok "the real clickup plug passes the guard" || bad "real repo" "$o"

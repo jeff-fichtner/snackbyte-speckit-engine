@@ -76,8 +76,9 @@ marked otherwise.
 - **Persistence**: `commit-spec-artifacts.sh` (git-lifecycle, `before_implement`) already stages
   `specs/<feature>/` only. It is widened to also stage modified or untracked committed extension
   config (`.specify/extensions/*/*-config.yml`, excluding `local-config.yml` and anything
-  gitignored). The rule is generic: git-lifecycle learns no ClickUp specifics.
-  `before_specify` already requires a clean tree, so any such change was made by the lifecycle.
+  gitignored). The rule is generic: git-lifecycle learns no ClickUp specifics. A deliberate
+  hand edit to such a file during the lifecycle is checkpointed too. It is repo config, not
+  noise.
 
 ## R8 — Deleting test containers
 

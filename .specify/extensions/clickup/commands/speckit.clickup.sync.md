@@ -34,13 +34,18 @@ on sign-off).
   engine extension. Install it: `specify extension add engine`." (The CLI does not enforce
   `requires.extensions` — this guard is the enforcement.)
 - The ClickUp MCP server is connected.
-- ClickUp sync is not disabled for this repo. Config is layered, highest wins:
-  env (`SPECKIT_CLICKUP_<KEY>`) > `local-config.yml` (gitignored, machine-local) >
-  `clickup-config.yml` (committed, consumer-owned) > `extension.yml` `config.defaults`.
-  (Migration grace: legacy `config.local.yml`/`config.yml` are read only when none of the new
-  files exist — see docs/MIGRATION.md.) If the merged view has `enabled: false` (the user
-  previously declined), **silently do nothing and exit 0** — do not ask, do not sync. (Matches
-  provision's decline state.)
+- ClickUp sync is not disabled for this repo. Ask the plug's resolver, which applies the
+  layered config (env > `local-config.yml` > `clickup-config.yml` > defaults) exactly as
+  provision does:
+
+  ```bash
+  .specify/extensions/clickup/scripts/bash/targets.sh resolve
+  ```
+
+  If its `status` is `disabled` (the user declined), **silently do nothing and exit 0**. Do not
+  ask, do not sync. Any other status means continue, **even `invalid`**. Sync addresses ClickUp by
+  the IDs in the feature manifest, never by config, so a config still awaiting migration only
+  matters to the next provision.
 - The manifest has `workspaceId`, `listId` and `statusMapping`. If not, **refuse** and tell the
   user to run `/speckit-clickup-provision` first. Do NOT create the list, look one up, or guess a
   mapping here. Check with:

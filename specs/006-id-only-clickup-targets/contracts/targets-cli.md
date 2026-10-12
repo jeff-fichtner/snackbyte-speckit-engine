@@ -24,13 +24,15 @@ Guarantees:
 
 ## `targets.sh pin-list --id ID --name NAME [--config-dir DIR]`
 
-Pins the created list in the committed `DIR/clickup-config.yml`:
+Pins the created list in the committed layer `resolve` reads: `DIR/clickup-config.yml`, or the
+legacy `config.yml` in migration-grace mode. The file is created if missing.
 - If the file has a top-level `new-list-name:` line, that line becomes `list-id: "ID"  # NAME`.
 - Otherwise (the name came from env or `local-config.yml`), `list-id: "ID"  # NAME` is appended.
 
-Every other byte is unchanged.
+Every other byte is unchanged, and the file keeps its mode. A blank or `<...>` `list-id` line
+never shadows the pin, because the reader takes the last *real* value.
 
 | Exit | When |
 |---|---|
 | 0 | Pinned. Prints `pinned list-id ID (NAME) in <path>` |
-| 1 | `ID` not numeric; `list-id` already set in the file; file missing |
+| 1 | `ID` not numeric; `list-id` already set |

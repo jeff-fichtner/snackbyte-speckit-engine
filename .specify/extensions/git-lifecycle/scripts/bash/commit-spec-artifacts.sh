@@ -82,8 +82,8 @@ fi
 # Compute the spec directory path relative to the repo root for git pathspec.
 REL_SPEC_DIR="${FEATURE_DIR#"$REPO_ROOT"/}"
 
-# Repo-level extension config changed since the clean tree before_specify required: modified or
-# untracked, not ignored, never the machine-local layer.
+# Changed repo-level extension config (a plug's pin, the ask-once write, or a deliberate edit):
+# modified or untracked, not ignored, never the machine-local layer.
 PATHS=("$REL_SPEC_DIR")
 while IFS= read -r p; do
     [[ -n "$p" && "$(basename "$p")" != "local-config.yml" ]] && PATHS+=("$p")

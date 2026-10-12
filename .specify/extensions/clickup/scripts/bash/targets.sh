@@ -12,7 +12,7 @@
 # Layers, highest wins: env SPECKIT_CLICKUP_<KEY> (`-`→`_`, uppercased) > local-config.yml >
 # clickup-config.yml > extension.yml `config.defaults`. Legacy config.local.yml / config.yml are
 # read only when neither new file exists. Only top-level `key: value` lines are read; a `<...>`
-# placeholder counts as absent; the last occurrence of a key in a file wins.
+# placeholder counts as absent; the last real value of a key in a file wins.
 #
 # Usage:
 #   targets.sh resolve [--config-dir DIR]
@@ -23,9 +23,10 @@
 #         {"status":"unconfigured"}   nothing set — the caller asks once for IDs
 #         {"status":"invalid","errors":[...]}  (exit 1; each error also on stderr, key first)
 #   targets.sh pin-list --id ID --name NAME [--config-dir DIR]
-#       Pin a just-created list in DIR/clickup-config.yml: the `new-list-name:` line becomes
+#       Pin a just-created list in the committed layer `resolve` reads (clickup-config.yml, or
+#       legacy config.yml), creating it if missing: the `new-list-name:` line becomes
 #       `list-id: "ID"  # NAME`, or that line is appended when the name came from another layer.
-#       Refuses (exit 1) a non-numeric ID, an already-pinned list-id, or a missing file.
+#       The file keeps its mode. Refuses (exit 1) a non-numeric ID or an already-pinned list-id.
 #
 # DIR defaults to this extension's directory. Exit 0 ok · 1 invalid/refused · 2 usage.
 set -euo pipefail
@@ -57,8 +58,9 @@ CONFIG_DIR="$(cd -- "$CONFIG_DIR" && pwd)"
 
 PLACEHOLDER='^<.*>$'
 
-# Print the value of top-level KEY in FILE (last occurrence wins). Empty when absent,
-# blank, or a <...> placeholder. Strips surrounding quotes and an unquoted trailing comment.
+# Print the value of top-level KEY in FILE: the last occurrence with a real value wins, so a
+# blank or <...> placeholder line never shadows one. Strips surrounding quotes and an unquoted
+# trailing comment.
 file_value() { # $1=file $2=key
     [[ -f "$1" ]] || return 0
     awk -v key="$2" '
@@ -74,7 +76,7 @@ file_value() { # $1=file $2=key
                 sub(/[ \t]+#.*$/, "", v)
                 sub(/[ \t\r]+$/, "", v)
             }
-            val = v; seen = 1
+            if (v != "" && v !~ /^<.*>$/) { val = v; seen = 1 }
         }
         END { if (seen) printf "%s", val }
     ' "$1" | { IFS= read -r v || true; [[ "$v" =~ $PLACEHOLDER ]] && v=""; printf '%s' "$v"; }
@@ -98,7 +100,8 @@ default_value() { # $1=key
 
 LOCAL="$CONFIG_DIR/local-config.yml"
 COMMITTED="$CONFIG_DIR/clickup-config.yml"
-if [[ ! -f "$LOCAL" && ! -f "$COMMITTED" ]]; then   # migration grace: legacy names
+if [[ ! -f "$LOCAL" && ! -f "$COMMITTED" ]] \
+   && [[ -f "$CONFIG_DIR/config.local.yml" || -f "$CONFIG_DIR/config.yml" ]]; then   # migration grace: legacy names
     LOCAL="$CONFIG_DIR/config.local.yml"
     COMMITTED="$CONFIG_DIR/config.yml"
 fi
@@ -120,7 +123,7 @@ is_id() { [[ "$1" =~ ^[0-9]+$ ]]; }
 
 cmd_resolve() {
     local enabled; enabled="$(get enabled | tr '[:upper:]' '[:lower:]')"
-    if [[ "$enabled" == "false" ]]; then jq -nc '{status:"disabled"}'; return 0; fi
+    case "$enabled" in false|no|off|0) jq -nc '{status:"disabled"}'; return 0 ;; esac
 
     local ws sp fo li nl wsn spn fon lin
     ws="$(get workspace-id)"; sp="$(get space-id)"; fo="$(get folder-id)"; li="$(get list-id)"
@@ -175,22 +178,22 @@ cmd_resolve() {
 cmd_pin_list() {
     $have_id || die "pin-list requires --id"
     [[ -n "$PIN_NAME" ]] || die "pin-list requires --name"
-    local f="$CONFIG_DIR/clickup-config.yml"
-    [[ -f "$f" ]] || { echo "pin-list: $f not found — add this line to it: list-id: \"$PIN_ID\"  # $PIN_NAME" >&2; return 1; }
+    local f="$COMMITTED"   # the committed layer resolve reads (legacy config.yml in grace mode)
     is_id "$PIN_ID" || { echo "pin-list: list-id \"$PIN_ID\" is not a ClickUp ID (IDs are numeric)" >&2; return 1; }
     local cur; cur="$(file_value "$f" list-id)"
     [[ -z "$cur" ]] || { echo "pin-list: $f already pins list-id \"$cur\" — not overwriting" >&2; return 1; }
 
     local line="list-id: \"$PIN_ID\"  # $PIN_NAME" tmp
+    [[ -f "$f" ]] || : > "$f"
     tmp="$(mktemp "$f.XXXXXX")"
     if grep -q '^new-list-name:' "$f"; then
         PIN_LINE="$line" awk '!done && /^new-list-name:/ { print ENVIRON["PIN_LINE"]; done = 1; next } { print }' "$f" > "$tmp"
     else
         cat "$f" > "$tmp"
-        [[ -z "$(tail -c 1 "$f")" ]] || printf '\n' >> "$tmp"
+        [[ ! -s "$f" || -z "$(tail -c 1 "$f")" ]] || printf '\n' >> "$tmp"
         printf '%s\n' "$line" >> "$tmp"
     fi
-    mv "$tmp" "$f"
+    cat "$tmp" > "$f" && rm -f "$tmp"   # rewrite in place: the file keeps its mode
     echo "pinned list-id $PIN_ID ($PIN_NAME) in $f"
 }
 

@@ -25,6 +25,7 @@ materializes as soon as `spec.md` exists and is enriched on every run.
 1. Read the full command body at
    `.specify/extensions/clickup/commands/speckit.clickup.sync.md`.
 2. Follow it verbatim:
+   - exit silently if `targets.sh resolve` says `disabled`; any other status continues
    - refuse (and point the user to `/speckit-clickup-provision`) unless the manifest has
      `workspaceId` + `listId` + `statusMapping`
    - derive body / US-subtasks / checkbox-lists / deps / status via the engine helpers

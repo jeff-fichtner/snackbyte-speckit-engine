@@ -24,13 +24,15 @@ ALLOW=" clickup_get_list clickup_get_folder clickup_create_list_in_folder clicku
  clickup_get_custom_fields clickup_create_comment "
 ALLOW=" $(echo $ALLOW) "   # one space between entries, so the membership test below is exact
 
+usage() { echo "id-only-guard: $1" >&2; exit 2; }
 while [[ $# -gt 0 ]]; do case "$1" in
-    --commands) CMD_DIR="$2"; shift 2 ;;
-    --skills)   SKILLS_DIR="$2"; shift 2 ;;
+    --commands) [[ $# -ge 2 ]] || usage "--commands needs a value"; CMD_DIR="$2"; shift 2 ;;
+    --skills)   [[ $# -ge 2 ]] || usage "--skills needs a value"; SKILLS_DIR="$2"; shift 2 ;;
     -h|--help)  sed -n '2,14p' "$0"; exit 0 ;;
-    *) echo "id-only-guard: unknown argument $1" >&2; exit 2 ;;
+    *) usage "unknown argument $1" ;;
 esac; done
-[[ -d "$CMD_DIR" ]] || { echo "id-only-guard: commands dir not found: $CMD_DIR" >&2; exit 2; }
+[[ -d "$CMD_DIR" ]]    || usage "commands dir not found: $CMD_DIR"
+[[ -d "$SKILLS_DIR" ]] || usage "skills dir not found: $SKILLS_DIR"   # never a silent clean
 
 files=()
 for f in "$CMD_DIR"/*.md "$SKILLS_DIR"/speckit-clickup-*/SKILL.md; do [[ -f "$f" ]] && files+=("$f"); done
