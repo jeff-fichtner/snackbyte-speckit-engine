@@ -14,19 +14,20 @@
   },
   "card": {
     "id": "86bcgk14k",
-    "hash": "sha256:87d6b50884d4f8b007d3458abf99b5482eebcdf8b1bab77809fc9a6f888565f0"
+    "hash": "sha256:10a7be4cc995dba270c938f4c76b007e11ad3675dff68ff4a7f4a337f2252aa8",
+    "provenanceHash": "sha256:2f22ae42527c83414052790a79bf87c45ad2b7a68606361428cd6e04b4ebdbf4"
   },
   "userStories": [
     {
       "us": "US1",
       "id": "86bcgk15v",
-      "hash": "sha256:e54739ffe8c8583a7ff1eb474015773700184227545ce5541af1badd9f786746",
+      "hash": "sha256:78a721bc630ed727d8f57304d4b2b274c09c7199ea96f53fb2cf4e8302c5ac25",
       "dependsOn": []
     },
     {
       "us": "US2",
       "id": "86bcgk166",
-      "hash": "sha256:f8fa02a4223a3368a4a005e6ef34a36059d64a3daee8563c1c033c43f049e06d",
+      "hash": "sha256:f42b8d5feac593201f67aeee8e86c6ae976eabf10d37b87cc4adc688b2d77ca6",
       "dependsOn": [
         "US1"
       ]
@@ -34,7 +35,7 @@
     {
       "us": "US3",
       "id": "86bcgk169",
-      "hash": "sha256:fce686d9a34dc64835f2e1e48f1bb7eaa5d3cab1c37f3e963752b2444032648b",
+      "hash": "sha256:c778fe4b883980e0ef64b47d136765fc98473902f22d8a778614e11d2ed14fbf",
       "dependsOn": [
         "US1",
         "US2"
@@ -43,7 +44,7 @@
     {
       "us": "US4",
       "id": "86bcgk16f",
-      "hash": "sha256:ff4bd49a273ce63c1bee8f86a91d2443faa8b80e34973b535b3ade92beb8ed3d",
+      "hash": "sha256:a474bcd6dd59801a8d1da28c394f2c05f1bb0a9f24ed2c83829cf1d29374674e",
       "dependsOn": [
         "US1",
         "US2",
@@ -53,6 +54,7 @@
   ],
   "lifecycle": {
     "analyzed": true,
-    "implementStarted": true
+    "implementStarted": true,
+    "verifyPassed": true
   }
 }

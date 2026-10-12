@@ -21,7 +21,7 @@ SKILLS_DIR="$ROOT/.claude/skills"
 # Changing this list is a deliberate, reviewed edit: every entry addresses ClickUp by ID.
 ALLOW=" clickup_get_list clickup_get_folder clickup_create_list_in_folder clickup_create_task
  clickup_update_task clickup_get_task clickup_add_task_dependency clickup_remove_task_dependency
- clickup_get_custom_fields clickup_create_task_comment "
+ clickup_get_custom_fields clickup_create_comment "
 ALLOW=" $(echo $ALLOW) "   # one space between entries, so the membership test below is exact
 
 while [[ $# -gt 0 ]]; do case "$1" in
