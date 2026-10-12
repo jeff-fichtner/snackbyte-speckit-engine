@@ -34,7 +34,7 @@ Invariant: every `*Id` is digits-only and came from a `*-id` key. A name never r
           path=create                                        path=existing (every later run)
 ```
 
-The transition is the `pin-list` rewrite. It is one-way: nothing rewrites `list-id` back.
+The transition is the `pin-list` rewrite (or append, when `new-list-name` came from an override layer). It is one-way: nothing rewrites `list-id` back.
 
 ## Feature manifest (`specs/<feature>/.clickup-sync.json`)
 

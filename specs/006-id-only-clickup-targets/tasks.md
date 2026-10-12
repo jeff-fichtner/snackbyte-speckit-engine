@@ -77,8 +77,8 @@ with its `*.test.sh` in the same change.
 
 - [ ] T016 [US3] Tests in `.specify/extensions/clickup/scripts/bash/targets.test.sh`:
   - `resolve` → `ready/create`
-  - `pin-list` rewrites exactly one line; every other byte is unchanged
-  - `pin-list` refuses: a non-numeric ID, an already-pinned `list-id`, no `new-list-name` line, a missing file
+  - `pin-list` rewrites the `new-list-name` line, or appends when the name came from an override layer; every other byte is unchanged
+  - `pin-list` refuses: a non-numeric ID, an already-pinned `list-id`, a missing file
 - [ ] T017 [US3] Implement the create path in `resolve` and the `pin-list` subcommand in `.specify/extensions/clickup/scripts/bash/targets.sh`
 - [ ] T018 [US3] Add the create path to `.specify/extensions/clickup/commands/speckit.clickup.provision.md`:
   - `clickup_get_folder(folder_id, workspace_id)`; not-found stops naming `folder-id`

@@ -22,12 +22,15 @@ Guarantees:
 - No name value ever appears in a `*Id` field.
 - `newListName` appears only on the create path.
 
-## `targets.sh pin-list --id ID [--config-dir DIR]`
+## `targets.sh pin-list --id ID --name NAME [--config-dir DIR]`
 
-Rewrites `DIR/clickup-config.yml` in place: the single top-level `new-list-name: "<name>"` line
-becomes `list-id: "ID"  # <name>`. Every other byte is unchanged.
+Pins the created list in the committed `DIR/clickup-config.yml`:
+- If the file has a top-level `new-list-name:` line, that line becomes `list-id: "ID"  # NAME`.
+- Otherwise (the name came from env or `local-config.yml`), `list-id: "ID"  # NAME` is appended.
+
+Every other byte is unchanged.
 
 | Exit | When |
 |---|---|
-| 0 | Pinned. Prints `pinned list-id ID (<name>) in <path>` |
-| 1 | `ID` not numeric; `list-id` already set in the file; no `new-list-name` line; file missing |
+| 0 | Pinned. Prints `pinned list-id ID (NAME) in <path>` |
+| 1 | `ID` not numeric; `list-id` already set in the file; file missing |
