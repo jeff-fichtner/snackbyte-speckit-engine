@@ -1,8 +1,11 @@
-# ClickUp plug — repo-level config (committed; space/list are locations, never secrets).
+# ClickUp plug — repo-level config (committed; IDs are locations, never secrets).
+# Containers are located by ID only; the names in comments are for humans and are never read.
 # Machine-local overrides go in local-config.yml (gitignored). Preserved across
 # `specify extension update` (CLI config-rescue naming).
-space: "snackbyte-speckit-engine"
-list: "List"
+workspace-id: "90141363864"   # Workspace
+space-id: "90146747064"       # platforms
+folder-id: "901411097129"     # speckit-engine
+list-id: "901418532190"       # Roadmap
 statuses:
   open: "backlog"
   in-design: "in design"
