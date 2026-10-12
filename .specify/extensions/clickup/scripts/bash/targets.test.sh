@@ -156,6 +156,10 @@ bash "$T" pin-list --id 555 --name Roadmap --config-dir "$d" >/dev/null; prc=$?
     && ok "pin-list appends when the name came from an override layer" || bad "pin-append" "$(cat "$d/clickup-config.yml")"
 [[ "$(field "$d" listId)" == "555" ]] && ok "appended pin resolves" || bad "append-resolve" "$(resolve "$d")"
 
+d="$(newdir)"; printf 'new-list-name: "a\\tb"\n' > "$d/clickup-config.yml"
+bash "$T" pin-list --id 12 --name 'a\tb' --config-dir "$d" >/dev/null
+[[ "$(cat "$d/clickup-config.yml")" == 'list-id: "12"  # a\tb' ]] && ok "pin-list writes the name verbatim (no escape processing)" || bad "pin-verbatim" "$(cat "$d/clickup-config.yml")"
+
 d="$(newdir)"; printf 'new-list-name: "R"\n' > "$d/clickup-config.yml"; cp "$d/clickup-config.yml" "$TMP/nn.yml"
 bash "$T" pin-list --id abc --name R --config-dir "$d" >/dev/null 2>&1; prc=$?
 [[ "$prc" == "1" ]] && cmp -s "$TMP/nn.yml" "$d/clickup-config.yml" && ok "pin-list refuses a non-numeric ID; file unchanged" || bad "pin-nonnum" "$prc"

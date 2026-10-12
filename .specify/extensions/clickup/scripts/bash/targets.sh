@@ -51,6 +51,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 [[ -d "$CONFIG_DIR" ]] || die "config dir not found: $CONFIG_DIR"
+CONFIG_DIR="$(cd -- "$CONFIG_DIR" && pwd)"
 
 # ---- flat reader -------------------------------------------------------------------------
 
@@ -183,7 +184,7 @@ cmd_pin_list() {
     local line="list-id: \"$PIN_ID\"  # $PIN_NAME" tmp
     tmp="$(mktemp "$f.XXXXXX")"
     if grep -q '^new-list-name:' "$f"; then
-        awk -v line="$line" '!done && /^new-list-name:/ { print line; done = 1; next } { print }' "$f" > "$tmp"
+        PIN_LINE="$line" awk '!done && /^new-list-name:/ { print ENVIRON["PIN_LINE"]; done = 1; next } { print }' "$f" > "$tmp"
     else
         cat "$f" > "$tmp"
         [[ -z "$(tail -c 1 "$f")" ]] || printf '\n' >> "$tmp"

@@ -106,7 +106,9 @@ with its `*.test.sh` in the same change.
 
 - [x] T023 [P] Add this repo's current real IDs (90146747064, 901411097129, 901418532190) to `FORBIDDEN_CONTENT` in `.specify/scripts/bash/release.sh`. Keep the old ones. `release.test.sh` stays green.
 - [x] T024 [P] Update the provision command description in `.specify/extensions/clickup/extension.yml` (hooks unchanged, so wiring fidelity holds)
-- [ ] T025 Run `npm run check:all`, then quickstart Scenarios 0–7 live. Record the evidence (IDs, read-backs, the status-by-ID result) in `specs/006-id-only-clickup-targets/VALIDATION.md`.
+- [x] T025 Run `npm run check:all`, then quickstart Scenarios 0–7 live. Record the evidence (IDs, read-backs, the status-by-ID result) in `specs/006-id-only-clickup-targets/VALIDATION.md`.
+
+- [ ] T026 [manual] Jeff confirms deletion of the E2E list `901422173368` (`speckit-engine-e2e-delete-me`, platforms / speckit-engine). Then delete it through the self-hosted ClickUp MCP (`clickup_delete_list`) and read it back as not found (quickstart Scenario 6, SC-005).
 
 ## Dependencies & Execution Order
 
