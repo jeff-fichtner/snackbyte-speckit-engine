@@ -1,4 +1,20 @@
-and # snackbyte-speckit-engine
+# snackbyte-speckit-engine
+
+> **Deprecated (2026-10-14).** This engine is being replaced by its own engine in a new repo born
+> from this one. It is based on and consumes Spec Kit pieces, plus
+> [AI Hero](https://www.aihero.dev/) skills. This repo keeps working and stays up until every app
+> has migrated off it. No further changes land here.
+>
+> Known gaps we would fix here, which the new engine's design accounts for:
+>
+> - **Nothing enforces review-loop, though it is a hard dependency.** `engine` installs without it,
+>   and `/speckit-engine-verify` then fails at its first step. The new engine declares its hard
+>   dependencies. If one is missing, it stops at the first step and names the missing piece and
+>   how to install it.
+> - **The ClickUp card hash ignores body content**
+>   ([issue #1](https://github.com/jeff-fichtner/snackbyte-speckit-engine/issues/1)). Spec changes
+>   that touch only prose never reach the card. The new engine's change detection covers
+>   everything it mirrors.
 
 **An engine for [Spec Kit](https://spec-kit.org).** If Spec Kit is a manual transmission — you
 shift every gear yourself (`specify` → `clarify` → `plan` → `tasks` → `implement`) — this is the
