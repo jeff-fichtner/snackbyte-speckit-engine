@@ -122,9 +122,18 @@ Canonical content per element (keep this exact — the stored manifest hashes de
 - **Card**: `status=<feature-derived-status>;feature=<feature-dir-name>`
 - **US-subtask**: `us=<US#>;status=<per-us-derived-status>;items=<compact-json of that story's parse-tasks items array>`
 
-where the items array is `parse-tasks.sh` output filtered to that story
-(`.groups[] | select(.us==$u) | .items`, compact). Because these derive purely from repo state,
-re-running with no repo change yields identical hashes → every element skips (SC-002).
+where the items array is `parse-tasks.sh` output filtered to that story, compact:
+
+```bash
+.specify/extensions/engine/scripts/bash/parse-tasks.sh | jq -c --arg u "<US#>" '.groups[] | select(.us==$u) | .items'
+```
+
+Because these derive purely from repo state, re-running with no repo change yields identical
+hashes → every element skips (SC-002).
+
+Pipe `parse-tasks.sh` output straight into `jq`, or read it from a file; never pass it through
+`echo "$VAR"`. Task text can hold backslashes, and zsh's `echo` rewrites them, so `jq` stops with
+`Invalid escape` and the story's items come out empty, which produces a wrong hash.
 
 ## Diff and apply (toward the repo — one-way)
 

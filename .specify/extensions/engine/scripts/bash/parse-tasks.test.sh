@@ -117,6 +117,34 @@ else
     printf '%s' "$out6" | grep -q '"id":"T001","done":false' && ok "T6 (no-jq) prose [x] stays open" || bad "T6" "prose [x] marked done"
 fi
 
+# --- Fixture 7: backslashes and quotes in task text survive as valid JSON, with and without jq ---
+cat > "$TMP/backslash.md" <<'EOF'
+# Tasks
+
+## Phase 1: User Story 1 - First (Priority: P1)
+- [ ] T001 match ^[^@\s]+$ and ^https://\S+$ with "quotes" and C:\\dir\
+EOF
+want7='T001 match ^[^@\s]+$ and ^https://\S+$ with "quotes" and C:\\dir\'
+if have_jq; then
+    JQ_BIN="$(command -v jq)"
+    NOJQ_BIN="$TMP/nojq-bin"; mkdir -p "$NOJQ_BIN"
+    for c in bash env dirname basename awk sed git cat grep tr; do
+        src="$(command -v "$c" || true)"
+        [[ -n "$src" ]] && ln -s "$src" "$NOJQ_BIN/$c"
+    done
+    # The script runs under each bash available: /bin/bash is 3.2 on macOS, where the shebang can resolve.
+    for shell_bin in bash /bin/bash; do
+        out7="$("$shell_bin" "$PARSE" --file "$TMP/backslash.md")"
+        [[ "$(printf '%s' "$out7" | "$JQ_BIN" -r '.groups[0].items[0].text')" == "$want7" ]] \
+            && ok "T7 $shell_bin: text round-trips with jq" || bad "T7" "$shell_bin with jq changed the text"
+        out7n="$(PATH="$NOJQ_BIN" "$shell_bin" "$PARSE" --file "$TMP/backslash.md")"
+        [[ "$(printf '%s' "$out7n" | "$JQ_BIN" -r '.groups[0].items[0].text')" == "$want7" ]] \
+            && ok "T7 $shell_bin: text round-trips without jq" || bad "T7" "$shell_bin without jq changed the text"
+    done
+else
+    ok "T7 skipped: needs jq to read the result"
+fi
+
 n="$(wc -l < "$FAIL_F" | tr -d "[:space:]")"; n="${n:-0}"
 echo ""
 if [[ "$n" -eq 0 ]]; then echo "parse-tasks: ALL PASS"; else echo "parse-tasks: $n FAIL"; exit 1; fi
