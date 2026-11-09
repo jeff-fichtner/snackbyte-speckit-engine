@@ -1,6 +1,6 @@
 # snackbyte-speckit-engine
 
-**An engine for [Spec Kit](https://spec-kit.org).** If Spec Kit is a manual transmission — you
+**An engine for [Spec Kit](https://speckit.org).** If Spec Kit is a manual transmission — you
 shift every gear yourself (`specify` → `clarify` → `plan` → `tasks` → `implement`) — this is the
 engine that powers it: it senses where a feature is in its lifecycle, drives it forward, keeps the
 lifecycle moving on its own, and mirrors that state out to the trackers you care about.
