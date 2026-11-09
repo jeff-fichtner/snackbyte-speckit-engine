@@ -1,21 +1,5 @@
 # snackbyte-speckit-engine
 
-> **Deprecated (2026-10-14).** This engine is being replaced by its own engine in a new repo born
-> from this one. It is based on and consumes Spec Kit pieces, plus
-> [AI Hero](https://www.aihero.dev/) skills. This repo keeps working and stays up until every app
-> has migrated off it. No further changes land here.
->
-> Known gaps we would fix here, which the new engine's design accounts for:
->
-> - **Nothing enforces review-loop, though it is a hard dependency.** `engine` installs without it,
->   and `/speckit-engine-verify` then fails at its first step. The new engine declares its hard
->   dependencies. If one is missing, it stops at the first step and names the missing piece and
->   how to install it.
-> - **The ClickUp card hash ignores body content**
->   ([issue #1](https://github.com/jeff-fichtner/snackbyte-speckit-engine/issues/1)). Spec changes
->   that touch only prose never reach the card. The new engine's change detection covers
->   everything it mirrors.
-
 **An engine for [Spec Kit](https://spec-kit.org).** If Spec Kit is a manual transmission — you
 shift every gear yourself (`specify` → `clarify` → `plan` → `tasks` → `implement`) — this is the
 engine that powers it: it senses where a feature is in its lifecycle, drives it forward, keeps the
@@ -60,6 +44,13 @@ is what makes "zero external plugs" still work.
   (repo is source of truth), idempotent, MCP-only. Specified and validated in
   [`001-clickup-sync`](specs/001-clickup-sync/spec.md). It is the first plug and the proof of the
   interface.
+- **Known gaps:**
+  - `review-loop` is a hard dependency that nothing enforces. `engine` installs without it, and
+    `/speckit-engine-verify` then fails at its first step. Install all four extensions (see
+    [Install](#install-into-your-repo)).
+  - The ClickUp card hash ignores body content
+    ([issue #1](https://github.com/jeff-fichtner/snackbyte-speckit-engine/issues/1)). Spec changes
+    that touch only prose never reach the card.
 
 > Lineage: this repo began as `snackbyte-clickup-sync` — the ClickUp plug came first and proved
 > out the model. The engine is being generalized from it. Git history reflects that progression.
