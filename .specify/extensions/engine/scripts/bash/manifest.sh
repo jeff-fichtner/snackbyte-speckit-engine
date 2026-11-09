@@ -14,7 +14,8 @@
 #   set-card --id ID --hash H    Record the feature-card id + content hash.
 #   get-card                     Print the recorded card as JSON ({} if none).
 #   set-us --us US --id ID --hash H [--depends-on "US1,US2"]
-#                                Upsert a user-story subtask entry (merge by `us`).
+#                                Upsert a user-story subtask entry (merge by `us`). Without
+#                                --depends-on the recorded dependsOn is kept; "" clears it.
 #   get-us <US>                  Print the recorded US entry as JSON ({} if none).
 #   set-lifecycle --key K --value V   Set a lifecycle marker (K: analyzed|implementStarted|verifyPassed|
 #                                closedOut; V: true|false). Gates card states 4–6 (US3).
@@ -150,25 +151,30 @@ cmd_get_card() {
 
 cmd_set_us() {
     require_jq
-    local us="" id="" hash="" deps=""
+    local us="" id="" hash="" deps="" deps_given=false
     local i=0
     while [[ $i -lt ${#ARGS[@]} ]]; do
         case "${ARGS[$i]}" in
             --us) us="${ARGS[$((i+1))]:-}"; i=$((i+2)) ;;
             --id) id="${ARGS[$((i+1))]:-}"; i=$((i+2)) ;;
             --hash) hash="${ARGS[$((i+1))]:-}"; i=$((i+2)) ;;
-            --depends-on) deps="${ARGS[$((i+1))]:-}"; i=$((i+2)) ;;
+            --depends-on) deps="${ARGS[$((i+1))]:-}"; deps_given=true; i=$((i+2)) ;;
             *) i=$((i+1)) ;;
         esac
     done
     cmd_init
-    # deps "US1,US2" → JSON array
-    local deps_json="[]"
-    if [[ -n "$deps" ]]; then
+    # deps "US1,US2" → JSON array. Without --depends-on the recorded dependsOn is kept (a hash
+    # refresh); --depends-on "" clears it.
+    local deps_json="null"
+    if [[ "$deps_given" == true && -z "$deps" ]]; then
+        deps_json="[]"
+    elif [[ "$deps_given" == true ]]; then
         deps_json="$(printf '%s' "$deps" | jq -Rc 'split(",") | map(select(length>0))')"
     fi
     local tmp; tmp="$(jq --arg us "$us" --arg id "$id" --arg h "$hash" --argjson d "$deps_json" '
-        .userStories = ((.userStories // []) | map(select(.us != $us)) + [{us:$us, id:$id, hash:$h, dependsOn:$d}])
+        (.userStories // []) as $all
+        | ($all | map(select(.us == $us)) | .[0].dependsOn // []) as $recorded
+        | .userStories = ($all | map(select(.us != $us)) + [{us:$us, id:$id, hash:$h, dependsOn:($d // $recorded)}])
     ' "$MANIFEST")"
     printf '%s\n' "$tmp" > "$MANIFEST"
 }

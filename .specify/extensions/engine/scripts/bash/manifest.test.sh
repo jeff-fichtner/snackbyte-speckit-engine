@@ -60,6 +60,19 @@ cnt="$(jq '[.userStories[]|select(.us=="US1")]|length' "$D/.clickup-sync.json")"
 [[ "$cnt" == "1" ]] && ok "US upsert does not duplicate" || bad "upsert" "count=$cnt"
 [[ "$(bash "$M" get-us --dir "$D" US1 | jq -r '.id')" == "SUB1b" ]] && ok "US upsert updates id" || bad "upsert" "id"
 
+# --- set-us without --depends-on keeps the recorded dependsOn (a hash refresh) ---
+bash "$M" set-us --dir "$D" --us US2 --id X --hash sha256:h1 --depends-on US1
+bash "$M" set-us --dir "$D" --us US2 --id X --hash sha256:h2
+us2="$(bash "$M" get-us --dir "$D" US2)"
+[[ "$(jq -c '.dependsOn' <<<"$us2")" == '["US1"]' ]] && ok "set-us without --depends-on keeps dependsOn" || bad "deps-keep" "$(jq -c '.dependsOn' <<<"$us2")"
+[[ "$(jq -r '.hash' <<<"$us2")" == "sha256:h2" ]] && ok "set-us without --depends-on still updates hash" || bad "deps-keep-hash" "$(jq -r '.hash' <<<"$us2")"
+
+# --- set-us with --depends-on "" clears dependsOn; a new entry without the flag gets [] ---
+bash "$M" set-us --dir "$D" --us US2 --id X --hash sha256:h3 --depends-on ""
+[[ "$(bash "$M" get-us --dir "$D" US2 | jq -c '.dependsOn')" == '[]' ]] && ok "set-us --depends-on \"\" clears dependsOn" || bad "deps-clear" "$(bash "$M" get-us --dir "$D" US2 | jq -c '.dependsOn')"
+bash "$M" set-us --dir "$D" --us US9 --id Y --hash sha256:h
+[[ "$(bash "$M" get-us --dir "$D" US9 | jq -c '.dependsOn')" == '[]' ]] && ok "new US without --depends-on → []" || bad "deps-new" "$(bash "$M" get-us --dir "$D" US9 | jq -c '.dependsOn')"
+
 # --- get on absent manifest → empty, no crash ---
 [[ -z "$(bash "$M" get --dir "$TMP/none" listId)" ]] && ok "get on absent manifest → empty" || bad "absent" "not empty"
 
