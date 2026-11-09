@@ -26,7 +26,24 @@ spec** needs the config change.
    name key without its ID is an error. Beside its ID it is ignored.
 4. **No list yet?** Use `folder-id: "<id>"` + `new-list-name: "<name>"` in place of `list-id`.
    The first provision creates the list in that folder and pins its ID.
-5. **Update the extension** (`specify extension update`) and commit the config.
+5. **Move the extensions to the new release**, then commit the config and the updated
+   `.specify/` files together.
+
+   `specify extension update` asks `Update these extensions? [y/N]` and has no flag to skip the
+   question, so it needs a person at a terminal. An agent reinstalls from the catalog instead,
+   which asks nothing:
+
+   ```bash
+   for e in engine clickup git-lifecycle review-loop; do specify extension add "$e" --force; done
+   ```
+
+   This keeps `clickup-config.yml` and `local-config.yml`, keeps each extension recorded as a
+   catalog install (so a later `update` still works), and moves all four to the catalog's
+   current version. Check with `specify extension list`.
+
+   Either way, `.specify/extensions.yml` comes back with its hook blocks reordered. In a raw diff
+   that reads as hooks deleted and re-added; the set of hooks (event, extension, command) is
+   unchanged.
 
 ---
 
@@ -78,5 +95,6 @@ existing ClickUp cards reconcile without duplicates when you sync again.
 ## Known limitation
 
 Hook `enabled:` toggles in `.specify/extensions.yml` are regenerated on `specify extension
-update` (CLI behavior) — re-apply any disables after updating, or use the durable opt-out:
+update` and on `specify extension add --force` (CLI behavior) — re-apply any disables after
+updating, or use the durable opt-out:
 `enabled: false` in `clickup-config.yml` (survives updates, silences all ClickUp syncs).
