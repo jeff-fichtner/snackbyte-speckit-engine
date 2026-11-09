@@ -4,30 +4,30 @@
     "clickup": {
       "name": "ClickUp Plug",
       "description": "The ClickUp tracker plug for snackbyte-speckit-engine. Mirrors each Spec Kit feature into ClickUp as one feature-card in a shared list, with a subtask per user story (native dependency links), a markdown checkbox list of the tasks.md lines, a verbose body, and the engine's six-state lifecycle status (open→in-design→ready→in-development→in-review→done) advancing on every command. One-way (repo → ClickUp), idempotent, MCP-only. All deterministic lifecycle logic lives in the `engine` extension; this plug only orchestrates ClickUp MCP calls.",
-      "version": "2.0.1",
-      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.1/clickup-2.0.1.zip",
-      "sha256": "5de393eeffe54ead7366475a4fc3f4e655df11a6f5cb3f47054a6943d525e340"
+      "version": "2.0.2",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.2/clickup-2.0.2.zip",
+      "sha256": "7689a70f4701fd3a498c85682652866402be0ef4a0a589fa2725016dee6440ec"
     },
     "engine": {
       "name": "Spec Kit Lifecycle Engine",
       "description": "The tracker-agnostic Spec Kit lifecycle engine. Keeps the lifecycle moving on its own — required hooks chain specify→clarify, plan→tasks→analyze, and implement→converge→verify, leaving only clarify→plan, analyze→implement, and close as deliberate human steps. Derives a feature's six-state lifecycle (open→in-design→ready→in-development→in-review→done) from repo artifacts and recorded lifecycle markers, parses tasks.md, maps logical states onto a tracker's real status names (with a three-state fallback), keeps the idempotence manifest, renders commit provenance, and drives the verify + close-out ceremonies. Talks to NO tracker itself — tracker I/O belongs to plugs (e.g. the clickup plug).",
-      "version": "2.0.1",
-      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.1/engine-2.0.1.zip",
-      "sha256": "a3d1345c1dd75a45d0d191cdae3a6a4dff55343f02aea935ae53631275df5ef6"
+      "version": "2.0.2",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.2/engine-2.0.2.zip",
+      "sha256": "f922b0a3234a48850c1889ac97e0d82112fd73de82b816a138199e4b7d2db13b"
     },
     "git-lifecycle": {
       "name": "Git Lifecycle",
       "description": "Git operations at Spec Kit lifecycle points: prepare a clean working tree + feature branch before specifying, and checkpoint the feature's spec artifacts before implementation. Merged from the former git-specify-branch and git-commit extensions — renamed from id `git` (2026-07-27): spec-kit BUNDLES its own `git` extension, so `extension add git` resolves to the bundled one and ours could never install by that name — verified live during 003 US2 E2E.",
-      "version": "2.0.1",
-      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.1/git-lifecycle-2.0.1.zip",
-      "sha256": "ddd252e910dbe731649c46f5c4d60b46692fc6e1cb0fed1c03f51135eee97482"
+      "version": "2.0.2",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.2/git-lifecycle-2.0.2.zip",
+      "sha256": "c012719f7d97e1b1dee19bd352ef733971b2d513482b531d2764316396c9b1f2"
     },
     "review-loop": {
       "name": "Review Loop",
       "description": "The engine's review stage (Constitution VII: work → self-review → self-test → handoff) — one recursive loop with three targets: `spec` reviews a just-written spec.md; `analysis` applies /speckit-analyze's cross-artifact findings to spec/plan/tasks and re-checks until clean (formerly the analyze-autofix extension); `code` reviews implemented code + tests for /speckit-engine-verify. Fixes every issue with a single obvious correct resolution, never decides product questions, always terminates, and ends with a doctrine-shaped handoff.",
-      "version": "2.0.1",
-      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.1/review-loop-2.0.1.zip",
-      "sha256": "dc110b166c0ad2b0a204281bcd2237706f20128a77adeff6d50877213cbb7211"
+      "version": "2.0.2",
+      "download_url": "https://github.com/jeff-fichtner/snackbyte-speckit-engine/releases/download/v2.0.2/review-loop-2.0.2.zip",
+      "sha256": "841ed989475dcb97bc34bf8a56c3d0de63f259df022466a3c2fc1b1403e3d0d1"
     }
   }
 }
